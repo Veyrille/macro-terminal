@@ -1,0 +1,46 @@
+name: Update Macro Data JSON
+
+on:
+  schedule:
+    # 每天北京时间 08:00 自动刷新（UTC 00:00）
+    - cron: "0 0 * * *"
+    # 美东 8:30 / 10:00 / 14:00 数据发布后 30 分钟内追加刷新（冬令时对应 UTC 14:00, 15:30, 19:30）
+    - cron: "0 14 * * 1-5"
+    - cron: "30 15 * * 1-5"
+    - cron: "30 19 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch FRED series and build macro_data.json
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          MACRO_OUT_PATH: public/macro_data.json
+        run: |
+          mkdir -p public
+          python3 scripts/fetch_macro_data.py
+
+      - name: Commit updated macro_data.json if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/macro_data.json
+          if git diff --staged --quiet; then
+            echo "No data changes."
+          else
+            git commit -m "chore: update macro_data.json"
+            git push
+          fi
