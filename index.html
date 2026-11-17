@@ -1,0 +1,1754 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#F2F2F7" />
+    <link rel="icon" href="data:," />
+    <title>宏观数据</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2rem; }
+
+      :root {
+        --bg: #F2F2F7;
+        --surface: #FFFFFF;
+        --surface-2: #F2F2F7;
+        --ink: #000000;
+        --ink-2: rgba(60, 60, 67, 0.60);
+        --ink-3: #8E8E93;
+        --line: rgba(60, 60, 67, 0.18);
+        --row-line: rgba(60, 60, 67, 0.16);
+        --card-border: rgba(60, 60, 67, 0.12);
+        --red: #FF3B30;
+        --red-bg: rgba(255, 59, 48, 0.12);
+        --green: #34C759;
+        --green-bg: rgba(52, 199, 89, 0.12);
+        --amber: #FF9500;
+        --amber-bg: rgba(255, 149, 0, 0.12);
+        --chart: #1C1C1E;
+        --area-top: rgba(0, 0, 0, 0.06);
+        --area-bottom: rgba(0, 0, 0, 0);
+        --next-dot: #007AFF;
+        --badge-red-bg: rgba(255, 59, 48, 0.14);
+        --badge-red-bg-soft: rgba(255, 59, 48, 0.09);
+        --badge-green: #28CD41;
+        --badge-green-bg: rgba(52, 199, 89, 0.12);
+        --chart-zero: rgba(60, 60, 67, 0.18);
+        --bar: #FF3B30;
+        --bar-track: #E5E5EA;
+        --nav-bg: rgba(242, 242, 247, 0.82);
+        --nav-line: rgba(60, 60, 67, 0.20);
+        --seg-bg: rgba(118, 118, 128, 0.12);
+        --seg-active-bg: #FFFFFF;
+        --seg-active-ink: #000000;
+        --seg-ink: rgba(60, 60, 67, 0.60);
+        --tip-bg: #000000;
+        --tip-ink: #ffffff;
+        --tip-border: rgba(0, 0, 0, 0.08);
+        --glass-bg: rgba(255, 255, 255, 0.52);
+        --glass-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.78), 0 4px 20px rgba(0, 0, 0, 0.05);
+        --glider-bg: rgba(118, 118, 128, 0.12);
+        --glider-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.45);
+        --pill-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.78) 100%);
+        --pill-border: rgba(255, 255, 255, 1);
+        --pill-shadow: inset 0 1.5px 2px rgba(255, 255, 255, 1), inset 0 -1px 1px rgba(0, 0, 0, 0.04), 0 3px 10px rgba(0, 0, 0, 0.10);
+        --pill-ink: #000000;
+        --glass-ink: rgba(60, 60, 67, 0.60);
+        /* 规范别名：与现有变量同源，供根背景与卡片排版规范统一引用 */
+        --bg-primary: var(--bg);
+        --text-primary: var(--ink);
+        --bg-tertiary: var(--surface-2);
+        --text-secondary: var(--ink-2);
+        --text-tertiary: var(--ink-3);
+        --separator: var(--line);
+        --row-sep: rgba(60, 60, 67, 0.12);
+        /* 列表实体分割线：纯实色（非半透明），抗锯齿后每条深浅完全一致 */
+        --divider: #EFEFF4;
+        --cal-gray: #C7C7CC;
+      }
+      @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1C1C1E;
+        --surface: #2C2C2E;
+        --surface-2: #3A3A3C;
+        --ink: #FFFFFF;
+        --ink-2: rgba(235, 235, 245, 0.60);
+        --ink-3: #8E8E93;
+        --line: rgba(84, 84, 88, 0.50);
+        --card-border: rgba(84, 84, 88, 0.50);
+        --red: #FF453A;
+        --red-bg: rgba(255, 69, 58, 0.12);
+        --green: #30D158;
+        --green-bg: rgba(48, 209, 88, 0.12);
+        --amber: #FF9F0A;
+        --amber-bg: rgba(255, 159, 10, 0.12);
+        --chart: #F2F2F7;
+        --area-top: rgba(255, 255, 255, 0.12);
+        --area-bottom: rgba(255, 255, 255, 0);
+        --next-dot: #0A84FF;
+        --badge-red-bg: rgba(255, 69, 58, 0.14);
+        --badge-red-bg-soft: rgba(255, 69, 58, 0.09);
+        --badge-green: #30D158;
+        --badge-green-bg: rgba(48, 209, 88, 0.12);
+        --chart-zero: rgba(84, 84, 88, 0.50);
+        --bar: #FF453A;
+        --bar-track: #3A3A3C;
+        --nav-bg: rgba(28, 28, 30, 0.82);
+        --nav-line: rgba(84, 84, 88, 0.50);
+        --seg-bg: rgba(118, 118, 128, 0.24);
+        --seg-active-bg: #636366;
+        --seg-active-ink: #FFFFFF;
+        --seg-ink: rgba(235, 235, 245, 0.60);
+        --tip-bg: rgba(58, 58, 60, 0.92);
+        --tip-ink: #FFFFFF;
+        --tip-border: rgba(255, 255, 255, 0.15);
+        --glass-bg: rgba(38, 38, 42, 0.52);
+        --glass-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 6px 24px rgba(0, 0, 0, 0.35);
+        --glider-bg: rgba(255, 255, 255, 0.16);
+        --glider-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.22);
+        --pill-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.14) 100%);
+        --pill-border: rgba(255, 255, 255, 0.32);
+        --pill-shadow: inset 0 1px 1.5px rgba(255, 255, 255, 0.45), 0 3px 10px rgba(0, 0, 0, 0.35);
+        --pill-ink: #FFFFFF;
+        --glass-ink: rgba(235, 235, 245, 0.60);
+        --cal-gray: #48484A;
+      }
+      }
+      @media (prefers-color-scheme: dark) {
+        :root { --row-line: rgba(84, 84, 88, 0.50); --row-sep: rgba(84, 84, 88, 0.32); --divider: #38383A; }
+      }
+
+      :root { --nav-fade: rgba(242, 242, 247, 0); }
+      @media (prefers-color-scheme: dark) {
+        :root { --nav-fade: rgba(28, 28, 30, 0); }
+      }
+
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+      html { -webkit-text-size-adjust: 100%; width: 100%; max-width: 100vw; overflow-x: clip; box-sizing: border-box; background-color: var(--bg-primary) !important; min-height: 100dvh; }
+      #app { background-color: var(--bg-primary) !important; min-height: 100dvh; }
+      /* 全屏固定背景画布：覆盖顶部与底部橡皮筋越界区，任何位置都不露异色 */
+      .fixed-bg-canvas {
+        position: fixed; top: -100vh; bottom: -100vh; left: 0; right: 0;
+        background-color: var(--bg-primary); z-index: -999; pointer-events: none;
+      }
+      body {
+        margin: 0;
+        width: 100%; max-width: 100vw; overflow-x: clip; box-sizing: border-box;
+        background-color: var(--bg-primary) !important; min-height: 100dvh;
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+        font-size: 15px;
+        line-height: 1.55;
+        font-variant-numeric: tabular-nums;
+        overscroll-behavior-y: none;
+      }
+      .mono {
+        font-family: "JetBrains Mono", "SF Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums;
+      }
+      .wrap { max-width: 1280px; width: 100%; min-width: 0; box-sizing: border-box; margin: 0 auto; padding: 0 16px 96px; overflow-x: clip; transform: none; background-color: var(--bg-primary) !important; min-height: 100dvh; }
+
+      /* ---------- 大标题行：普通文档流，随页面滚动滚出屏幕（不常驻） ---------- */
+      .top-title-row {
+        position: relative;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 16px 6px 16px;
+        max-width: 1280px; width: 100%; min-width: 0; box-sizing: border-box; margin: 0 auto;
+        background: transparent; border: none !important; border-bottom: none !important; box-shadow: none !important;
+      }
+      .brand { font-size: 26px; font-weight: 600; letter-spacing: -0.015em; line-height: 1.2; -webkit-font-smoothing: antialiased; white-space: nowrap; flex: 0 0 auto; }
+      /* ---------- 导航栏吸顶容器：独立 sticky 常驻（仿 Telegram 文件夹栏） ---------- */
+      .sticky-nav-wrapper {
+        position: -webkit-sticky; position: sticky; top: 0; z-index: 100;
+        padding: 8px 16px 10px 16px; background: transparent !important;
+        max-width: 1280px; width: 100%; min-width: 0; box-sizing: border-box; margin: 0 auto;
+        border: none !important; border-bottom: none !important; box-shadow: none !important;
+        transform: translateZ(0); -webkit-transform: translateZ(0);
+        backface-visibility: hidden; -webkit-backface-visibility: hidden;
+      }
+      .ios-glass-nav {
+        position: relative; display: grid; grid-template-columns: repeat(6, 1fr); align-items: center;
+        height: 44px; padding: 4px; border-radius: 999px; box-sizing: border-box;
+        width: 100%; max-width: 520px; margin: 0 auto;
+        flex: 1 1 auto; min-width: 0; opacity: 1;
+        background: var(--glass-bg); border: none; box-shadow: var(--glass-shadow);
+        backdrop-filter: blur(24px) saturate(190%); -webkit-backdrop-filter: blur(24px) saturate(190%);
+        /* 独立 GPU 合成层：橡皮筋越界滚动时防止 WebKit 瓦片裁剪掉按钮文字；
+           不设 overflow: hidden，滑块本身已严格限制在内框内 */
+        transform: scale(1) translateY(0) translateZ(0); -webkit-transform: scale(1) translateY(0) translateZ(0);
+        backface-visibility: hidden; -webkit-backface-visibility: hidden;
+        transform-origin: center top;
+        transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease;
+      }
+      /* 上滑浏览时缩小为紧凑态（仿 Instagram），下滑或回顶恢复。
+         紧凑态只改 transform 与 opacity，绝不动 height（恒定 44px），
+         防止导航栏高度变化引发下方页面滚动坐标跳动 */
+      .ios-glass-nav.nav-shrunk {
+        transform: scale(0.88) translateY(-3px) translateZ(0); -webkit-transform: scale(0.88) translateY(-3px) translateZ(0);
+        opacity: 0.94;
+      }
+      .nav-glider {
+        position: absolute; top: 4px; bottom: 4px; left: 4px;
+        width: calc((100% - 8px) / 6); border-radius: 999px; z-index: 1; pointer-events: none;
+        background: var(--glider-bg); border: none; box-shadow: var(--glider-shadow);
+        box-sizing: border-box;
+        transform: translate3d(0, 0, 0) translateZ(0);
+        -webkit-transform: translate3d(0, 0, 0) translateZ(0);
+        backface-visibility: hidden; -webkit-backface-visibility: hidden;
+        transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1); will-change: transform;
+      }
+      .nav-glider.no-anim { transition: none !important; }
+      .tab {
+        appearance: none; background: transparent; border: none; cursor: pointer;
+        font: inherit; font-size: 13.5px; color: var(--glass-ink);
+        position: relative; z-index: 2; height: 36px; line-height: 36px; padding: 0;
+        width: 100%; text-align: center; border-radius: 999px; white-space: nowrap;
+        min-height: 36px; box-sizing: border-box;
+        touch-action: manipulation; -webkit-user-select: none; user-select: none;
+        transform: translateZ(0); -webkit-transform: translateZ(0);
+        backface-visibility: hidden; -webkit-backface-visibility: hidden;
+        transition: color 0.15s ease, background-color 0.15s ease, opacity 0.18s ease;
+      }
+      .tab:focus:not(:focus-visible) { outline: none; }
+      @media (hover: hover) and (pointer: fine) {
+        .tab:hover { color: var(--ink); }
+      }
+      .tab[aria-selected="true"] {
+        background: transparent; color: var(--pill-ink); font-weight: 600;
+      }
+      .top-right { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; margin-left: auto; }
+      .base-date { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+
+      /* 导航按钮点按：仅柔和背景高亮，无任何缩放变形，避免滑动取消 :active 时回弹抖动 */
+      .tab:active { background-color: rgba(120, 120, 128, 0.12); }
+      @media (prefers-color-scheme: dark) {
+        .tab:active { background-color: rgba(120, 120, 128, 0.24); }
+      }
+
+      /* ---------- 倒计时数字：等宽固定，跳秒不抖动 ---------- */
+      [data-cd] { font-variant-numeric: tabular-nums; display: inline-block; }
+
+      /* ---------- 下拉刷新指示器：iOS 原生无底框 12 瓣菊花（UIRefreshControl） ---------- */
+      .ptr {
+        position: fixed; left: 50%; top: 68px; z-index: 40;
+        width: 22px; height: 22px; margin-left: -11px;
+        display: flex; align-items: center; justify-content: center;
+        background: transparent; border: none; box-shadow: none;
+        opacity: 0; pointer-events: none;
+        transform: translate3d(0, 0, 0) scale(0.6);
+      }
+      .ptr svg { display: block; width: 22px; height: 22px; }
+      .ptr line { opacity: 0.15; }
+      /* 松手刷新：12 帧透明度追逐动画，每瓣依次衰减，不整图匀速旋转 */
+      .ptr.spinning line { animation: ptrPetal 1s linear infinite; animation-delay: var(--d, 0s); }
+      @keyframes ptrPetal { 0% { opacity: 0.85; } 100% { opacity: 0.15; } }
+      /* ---------- sections ---------- */
+      .panel { display: none; padding-top: 18px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
+      .panel.active { display: block; animation: panelIn 0.16s ease-out; }
+      @keyframes panelIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      /* ---------- badges ---------- */
+      .badge {
+        flex: 0 0 auto; flex-shrink: 0; font-size: 12px; font-weight: 600; line-height: 1;
+        letter-spacing: 0.02em;
+        height: 22px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 6px; white-space: nowrap;
+      }
+      .badge.red { color: var(--red); background: var(--badge-red-bg); }
+      .badge.red.soft { color: var(--red); background: var(--badge-red-bg-soft); }
+      .badge.green { color: var(--badge-green); background: var(--badge-green-bg); }
+      .badge.amber { color: var(--amber); background: var(--amber-bg); }
+
+      /* ---------- overview board ---------- */
+      .ov-board { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); gap: 16px; margin-bottom: 22px; width: 100%; min-width: 0; box-sizing: border-box; }
+      .ov-box {
+        background: var(--surface); border: none; border-radius: 16px;
+        padding: 16px 18px; box-shadow: none;
+        width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden;
+      }
+      .ov-verdict { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+      .ov-verdict .vt { font-size: 16px; font-weight: 700; }
+      .ov-rate { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--line); }
+      .ov-rate .rl { font-size: 12.5px; color: var(--ink-2); }
+      .ov-rate .rv { font-size: 22px; font-weight: 700; line-height: 1.1; }
+      .ov-probs { margin-top: 12px; }
+      .prob-row { display: flex; align-items: center; flex-wrap: nowrap; margin: 7px 0; font-size: 13px; }
+      .prob-row .plabel { flex: 0 0 auto; flex-shrink: 0; white-space: nowrap; font-size: 13px; color: var(--ink-2); }
+      .prob-row .plabel .mono { color: var(--ink); font-weight: 600; }
+      .prob-row .pval { width: 44px; text-align: right; flex-shrink: 0; font-weight: 700; font-size: 13px; }
+      .bar { flex: 1; min-width: 56px; margin: 0 10px; height: 6px; background: var(--bar-track); border-radius: 3px; overflow: hidden; }
+      .bar > i { display: block; height: 100%; background: var(--bar); }
+      .bar > i.grey { background: var(--ink-3); }
+      .ov-events-title { font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 4px; }
+      .ov-event { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--row-sep); }
+      .ov-event:last-child { border-bottom: 0; padding-bottom: 2px; }
+      .ov-event .ev-main { flex: 1 1 auto; min-width: 0; }
+      .ov-event .ev-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .ov-event .ev-time { font-size: 12px; color: var(--ink-3); white-space: nowrap; margin-top: 1px; }
+      .ov-event .ecd { flex: 0 0 auto; flex-shrink: 0; font-size: 14px; font-weight: 600; white-space: nowrap; }
+
+      .list-title { font-size: 15px; font-weight: 600; margin: 0 0 10px; }
+      .ov-list { background: var(--surface); border-radius: 16px; padding: 6px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; }
+      /* 严格整数高度 64px + 整数内边距：每行起始坐标永远落在整数像素上，
+         消灭小数行高累加造成的亚像素漂移（分割线忽粗忽细/消失的根源） */
+      .overview-row, .ov-row {
+        height: 64px; box-sizing: border-box;
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        padding: 0 12px; flex-shrink: 0; border-radius: 10px; cursor: pointer; background: transparent;
+        transition: background-color 0.15s ease, opacity 0.18s ease;
+      }
+      /* 文档流实体分割线：独立节点在标准文档流中占据整数 1px 空间，
+         不用 border-bottom / ::after 绝对定位，不会被下一行背景遮盖；
+         颜色为纯实色 var(--divider)（浅 #EFEFF4 / 深 #38383A），不用低透明度 rgba */
+      .list-divider {
+        height: 1px; min-height: 1px; max-height: 1px; flex-shrink: 0;
+        margin: 0 12px; border: none; transform: none;
+        background-color: var(--divider);
+      }
+      /* 右侧状态标签收紧到刚好 3 个汉字宽度（48px），数值右边缘严格对齐 */
+      .ov-row .badge {
+        width: 48px; min-width: 48px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 6px; font-size: 12px; font-weight: 600; box-sizing: border-box; letter-spacing: 0; text-align: center;
+      }
+      .ov-row .badge.b3 { letter-spacing: 0; padding-left: 0; }
+      .ov-row .badge.b2 { letter-spacing: 0.25em; padding-left: 0.25em; }
+      @media (hover: hover) and (pointer: fine) {
+        .ov-row:hover { background: var(--surface-2); }
+      }
+      .ov-row:active { background-color: rgba(120, 120, 128, 0.12); }
+      @media (prefers-color-scheme: dark) {
+        .ov-row:active { background-color: rgba(120, 120, 128, 0.24); }
+      }
+      .ov-row .on { display: block; min-width: 0; letter-spacing: 0; }
+      .ov-row .on-name { display: block; font-size: 14.5px; font-weight: 600; letter-spacing: 0; line-height: 1.35; white-space: nowrap; overflow: visible; text-overflow: clip; }
+      .ov-row .on .sub2 { display: block; color: var(--ink-2); font-weight: 400; font-size: 12px; letter-spacing: 0; line-height: 1.35; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+      .ov-row .oval { font-size: 14.5px; font-weight: 600; letter-spacing: 0; white-space: nowrap; margin-left: auto; margin-right: 10px; text-align: right; font-variant-numeric: tabular-nums; }
+
+      /* ---------- indicator cards ---------- */
+      .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; width: 100%; min-width: 0; box-sizing: border-box; }
+      .card {
+        position: relative; z-index: 1;
+        background: var(--surface); border: none; border-radius: 16px;
+        box-shadow: none; padding: 16px;
+        display: flex; flex-direction: column; gap: 0; height: 100%;
+        width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;
+        /* 常驻独立 GPU 合成层：动画结束不销毁图层，杜绝图层回弹的 1px 跳动 */
+        transform: translate3d(0, 0, 0);
+        backface-visibility: hidden; -webkit-backface-visibility: hidden;
+        transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+        overflow: visible !important;
+      }
+      .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 24px; margin-bottom: 8px; width: 100%; min-width: 0; box-sizing: border-box; }
+      .card-head > div { min-width: 0; flex: 1; }
+      .card-head .badge { flex-shrink: 0; }
+      .card-title { font-size: 16px; font-weight: 600; line-height: 1.3; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .card-title .period { font-size: 13px; font-weight: 400; color: var(--text-tertiary); margin-left: 6px; }
+      .big-value { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif; font-size: 30px; font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap: break-word; display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+      .big-value .unit { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-left: 0; letter-spacing: 0; }
+      .compare { font-size: 12.5px; color: var(--text-secondary); line-height: 1.3; display: flex; flex-wrap: nowrap; white-space: nowrap; align-items: center; gap: 0; overflow: hidden; min-width: 0; max-width: 100%; margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+      .compare .cl { color: var(--text-tertiary); margin-right: 4px; }
+      .compare .cv { color: var(--text-primary); font-weight: 500; overflow-wrap: break-word; }
+      .compare .sep { margin: 0 8px; opacity: 0.28; font-weight: 300; flex-shrink: 0; }
+      .spark, .chart-wrapper { position: relative; height: 56px; flex: 0 0 56px; margin: 2px 0 12px 0; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow: visible !important; }
+      .chart-wrapper { overflow: visible !important; }
+      .spark .chart-slot { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
+      .spark svg { display: block; width: 100%; max-width: 100%; height: 56px; }
+      .spark .tip {
+        position: absolute; z-index: 30; pointer-events: none; white-space: nowrap;
+        background: var(--tip-bg); color: var(--tip-ink);
+        border: 0.5px solid var(--tip-border, transparent);
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        font-size: 11px; padding: 3px 7px; border-radius: 4px;
+        transform: translateX(-50%);
+      }
+      .spark .hover-dot {
+        position: absolute; width: 7px; height: 7px; border-radius: 50%;
+        background: var(--chart); border: 1.5px solid var(--surface);
+        transform: translate(-50%, -50%); pointer-events: none; z-index: 4;
+      }
+      .no-chart {
+        height: 56px; flex: 0 0 56px;
+        border: 1px dashed var(--line); border-radius: 6px;
+        display: flex; align-items: center; justify-content: center; text-align: center;
+        font-size: 11.5px; color: var(--ink-3); padding: 0 12px;
+        width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden;
+      }
+      .explain {
+        font-size: 12.5px; line-height: 1.3; color: var(--text-secondary);
+        margin: 0 0 10px;
+        background: var(--bg-tertiary); border-radius: 10px; padding: 0 12px;
+        height: 36px; display: flex; align-items: center;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;
+      }
+      .card-foot {
+        margin-top: 0; border-top: none; padding-top: 0;
+        display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 4px 8px;
+        font-size: 12px; line-height: 1; color: var(--text-tertiary); font-variant-numeric: tabular-nums;
+        width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;
+      }
+      .card-foot .fnext { flex: 0 1 auto; white-space: normal; overflow-wrap: break-word; word-break: break-word; min-width: 0; }
+      .card-foot.note { justify-content: flex-start; }
+      .card-foot .fleft { flex: 0 1 auto; white-space: nowrap; min-width: 0; }
+      .card-foot .fnext.cd { flex: 0 0 auto; white-space: nowrap; text-align: right; }
+
+      /* ---------- rate tab ---------- */
+      .stat-row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; margin-bottom: 16px; width: 100%; min-width: 0; box-sizing: border-box; }
+      .stat-box { background: var(--surface); border: none; border-radius: 16px; padding: 16px 18px; box-shadow: none; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden; }
+      .stat-box .label { font-size: 12.5px; color: var(--ink-2); margin-bottom: 5px; }
+      .stat-box .num { font-size: 30px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; overflow-wrap: break-word; }
+      .stat-box .sub { font-size: 12.5px; color: var(--ink-2); margin-top: 5px; overflow-wrap: break-word; word-break: break-word; }
+      .panel-box { background: var(--surface); border: none; border-radius: 16px; padding: 16px 18px; box-shadow: none; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden; }
+      .panel-box .pb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; width: 100%; min-width: 0; box-sizing: border-box; }
+      .panel-box .pb-head > div { min-width: 0; flex: 1; }
+      .panel-box .pb-head .badge { flex-shrink: 0; }
+      .panel-box .pb-explain { font-size: 12.5px; color: var(--ink-2); line-height: 1.6; margin: 10px 0 0; }
+      .note-rows p { font-size: 13px; color: var(--ink-2); line-height: 1.65; margin: 0; padding: 9px 0; border-bottom: 1px solid var(--line); }
+      .note-rows p:first-child { padding-top: 2px; }
+      .note-rows p:last-child { border-bottom: 0; padding-bottom: 2px; }
+      .note-rows b { color: var(--ink); font-weight: 600; }
+
+      /* ---------- calendar ---------- */
+      .cal-table { background: var(--surface); border: none; border-radius: 16px; padding: 6px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; margin-bottom: 22px; }
+      .cal-table:last-of-type { margin-bottom: 0; }
+      .cal-month-label {
+        font-size: 15px; font-weight: 700; color: var(--ink-2);
+        margin: 20px 0 8px;
+      }
+      .cal-month-label:first-child { margin-top: 2px; }
+      /* 「下一场」呼吸圆点：标在最近一场未公布事件的行首 */
+      .next-dot {
+        display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+        background: var(--next-dot); margin-right: 6px; vertical-align: 2px;
+        animation: nextDotPulse 1.6s ease-in-out infinite;
+      }
+      @keyframes nextDotPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.4); opacity: 0.5; }
+      }
+      .cal-head { display: none; }
+      /* 日历行与「最新数据一览」同款：整数 padding 12px + 整数 line-height 20px，
+         行高为整数像素；分割线同样用文档流实体 .list-divider 节点（见概览区定义） */
+      .cal-row {
+        display: flex; align-items: stretch;
+        padding: 12px; border-radius: 10px; background: transparent; line-height: 20px;
+        transition: background-color 0.15s ease, opacity 0.18s ease;
+      }
+      .cal-row[data-goto] { cursor: pointer; }
+      @media (hover: hover) and (pointer: fine) {
+        .cal-row[data-goto]:hover { background: var(--surface-2); }
+      }
+      .cal-row[data-goto]:active { background-color: rgba(120, 120, 128, 0.12); }
+      @media (prefers-color-scheme: dark) {
+        .cal-row[data-goto]:active { background-color: rgba(120, 120, 128, 0.24); }
+      }
+      /* 左侧重要度竖条：核心红 / 重要橙 / 常规灰，无文字标签 */
+      .cal-bar { width: 3px; border-radius: 2px; align-self: stretch; flex-shrink: 0; margin-right: 12px; background: var(--cal-gray); }
+      .cal-row.imp-core .cal-bar { background: var(--red); }
+      .cal-row.imp-high .cal-bar { background: var(--amber); }
+      .cal-row.past { opacity: .5; }
+      .cal-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+      .cal-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .c-time { font-size: 13px; font-weight: 600; white-space: nowrap; }
+      .c-time .wk { color: var(--ink-3); font-weight: 400; font-size: 12px; margin-left: 4px; }
+      .c-ev { font-size: 13.5px; font-weight: 600; min-width: 0; margin-top: 2px; overflow-wrap: break-word; }
+      .c-ev .note { display: block; color: var(--ink-2); font-size: 12px; font-weight: 400; margin-top: 1px; }
+      .cal-vals { font-size: 12px; font-variant-numeric: tabular-nums; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 5px; line-height: 20px; width: 100%; box-sizing: border-box; }
+      .cal-vals > span { min-width: 0; white-space: nowrap; }
+      .cal-vals > span:nth-child(1) { text-align: left; justify-self: start; }
+      .cal-vals > span:nth-child(2) { text-align: center; justify-self: center; }
+      .cal-vals > span:nth-child(3) { text-align: right; justify-self: end; }
+      .cal-vl { color: #8E8E93; }
+      .cal-vv { color: var(--ink); font-weight: 500; white-space: nowrap; }
+      .c-cd { font-size: 12.5px; font-weight: 600; text-align: right; white-space: nowrap; flex-shrink: 0; }
+      .c-cd.dim { color: var(--ink-3); font-weight: 400; }
+
+
+      /* ---------- 走势图极值与锚点标签 ---------- */
+      .chart-ext { position: absolute; left: 2px; font-size: 10px; line-height: 1; color: var(--ink-3); pointer-events: none; z-index: 3; white-space: nowrap; }
+      .chart-ext.hi { top: 0; }
+      .chart-ext.lo { bottom: 0; }
+      .chart-anchor { position: absolute; right: 2px; font-size: 9px; line-height: 1; color: var(--ink-3); pointer-events: none; z-index: 3; transform: translateY(-130%); white-space: nowrap; }
+      .spark.spark-lg { height: 120px; flex: 0 0 120px; }
+      .spark.spark-lg svg { height: 120px; }
+
+      /* ---------- 底部半屏详情抽屉（Bottom Sheet） ---------- */
+      .sheet-mask[hidden], .sheet[hidden] { display: none !important; }
+      .sheet-mask { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.32); opacity: 0; transition: opacity 0.32s ease; z-index: 200; }
+      .sheet-mask.open { opacity: 1; }
+      .sheet {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 201;
+        max-width: 720px; margin: 0 auto; height: 62vh;
+        background: var(--surface); border-radius: 20px 20px 0 0;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+        transform: translateY(103%); transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+        display: flex; flex-direction: column; overflow: hidden;
+      }
+      .sheet.open { transform: translateY(0); }
+      .sheet-grab { padding: 10px 0 4px; display: flex; justify-content: center; flex: 0 0 auto; cursor: grab; touch-action: none; }
+      .sheet-handle { width: 36px; height: 5px; border-radius: 3px; background: var(--cal-gray); display: block; }
+      .sheet-body { overflow-y: auto; padding: 6px 20px calc(24px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; }
+      .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
+      .sheet-title { font-size: 17px; font-weight: 700; min-width: 0; }
+      .sheet-title .period { font-size: 13px; font-weight: 400; color: var(--ink-3); margin-left: 6px; }
+      .sheet-big { font-size: 38px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin: 6px 0 12px; }
+      .sheet-big .unit { font-size: 14px; font-weight: 500; color: var(--ink-2); margin-left: 4px; }
+      .sheet-compare { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+      .sheet-compare .sc { background: var(--surface-2); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+      .sheet-compare .sc .l { font-size: 11.5px; color: var(--ink-3); }
+      .sheet-compare .sc .v { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .sheet-sec { font-size: 13px; font-weight: 600; color: var(--ink-2); margin: 14px 0 4px; }
+      .sheet-hist-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 13.5px; }
+      .sheet-hist-row .hv { font-weight: 600; font-variant-numeric: tabular-nums; }
+      .sheet-explain { font-size: 13.5px; line-height: 1.65; color: var(--ink-2); margin: 12px 0 4px; }
+      .foot-note { margin-top: 20px; font-size: 12px; color: var(--ink-3); line-height: 1.7; }
+
+      @media (max-width: 1024px) {
+        .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+        .ov-board { grid-template-columns: minmax(0, 1fr); width: 100%; }
+      }
+      @media (max-width: 768px) {
+        .grid { grid-template-columns: minmax(0, 1fr); width: 100%; gap: 12px; }
+        .ov-board { grid-template-columns: minmax(0, 1fr); width: 100%; }
+        .stat-row { grid-template-columns: minmax(0, 1fr); width: 100%; }
+        .card, .ov-box, .stat-box, .panel-box { width: 100%; max-width: 100%; min-width: 0; }
+      }
+      @media (max-width: 720px) {
+        .c-cd { font-size: 12px; }
+      }
+      @media (max-width: 640px) {
+        .wrap { padding: 0 16px 96px; }
+        .top-title-row { padding: 12px 16px 6px 16px; }
+        .sticky-nav-wrapper { padding: 8px 16px 10px 16px; }
+        .tab { font-size: 13.5px; }
+        .grid { grid-template-columns: minmax(0, 1fr); width: 100%; }
+        .stat-row { grid-template-columns: minmax(0, 1fr); width: 100%; }
+        .base-date { display: none; }
+        .ov-row { gap: 8px; }
+        .ov-row .badge { width: 48px; min-width: 48px; height: 22px; font-size: 12px; padding: 0; }
+        .ov-row .badge.b2 { letter-spacing: 0.25em; padding-left: 0.25em; }
+        .ov-row .badge.b3 { letter-spacing: 0; padding-left: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * { transition: none !important; animation: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fixed-bg-canvas" aria-hidden="true"></div>
+    <div class="top-title-row">
+      <div class="brand">宏观数据终端</div>
+      <div class="top-right">
+        <span class="base-date mono">数据基准日 2026-11-15</span>
+      </div>
+    </div>
+    <div class="sticky-nav-wrapper">
+      <nav class="tabs ios-glass-nav" role="tablist" aria-label="分区">
+        <span class="nav-glider" id="navGlider" aria-hidden="true"></span>
+        <button class="tab" role="tab" data-tab="overview" aria-selected="true">概览</button>
+        <button class="tab" role="tab" data-tab="rate" aria-selected="false">利率</button>
+        <button class="tab" role="tab" data-tab="inflation" aria-selected="false">通胀</button>
+        <button class="tab" role="tab" data-tab="jobs" aria-selected="false">就业</button>
+        <button class="tab" role="tab" data-tab="growth" aria-selected="false">市场</button>
+        <button class="tab" role="tab" data-tab="calendar" aria-selected="false">日历</button>
+      </nav>
+    </div>
+
+    <div class="ptr" id="ptr" aria-hidden="true"><svg id="ptrSvg" viewBox="0 0 22 22" width="22" height="22" aria-hidden="true"></svg></div>
+
+    <div class="wrap">
+
+      <!-- ================= 概览 ================= -->
+      <section class="panel active" id="panel-overview" role="tabpanel">
+        <div class="ov-board">
+          <div class="ov-box">
+            <div class="ov-verdict">
+              <span class="vt">美联储加息周期 · 总体偏鹰</span>
+              <span class="badge red">利空</span>
+            </div>
+            <div class="ov-rate">
+              <span class="rl">联邦基金利率（目标区间）</span>
+              <span class="rv mono">3.75% – 4.00%</span>
+            </div>
+            <div class="ov-probs">
+              <div class="prob-row"><span class="plabel">CME 12 月 <span class="mono">+25bp</span></span><span class="bar"><i style="width:88.5%"></i></span><span class="pval mono">88.5%</span></div>
+              <div class="prob-row"><span class="plabel">CME 12 月 <span class="mono">+50bp</span></span><span class="bar"><i style="width:11.5%"></i></span><span class="pval mono">11.5%</span></div>
+              <div class="prob-row"><span class="plabel">维持不变 / 降息</span><span class="bar"><i class="grey" style="width:0%"></i></span><span class="pval mono">0%</span></div>
+            </div>
+          </div>
+          <div class="ov-box">
+            <div class="ov-events-title">近期重点事件</div>
+            <div class="ov-event">
+              <div class="ev-main"><div class="ev-name">初请失业金人数</div><div class="ev-time mono">11-19 周四 21:30</div></div>
+              <div class="ecd mono" data-cd="2026-11-19T21:30:00+08:00">—</div>
+            </div>
+            <div class="ov-event">
+              <div class="ev-main"><div class="ev-name">PCE 通胀 (10月) + GDP 修正值</div><div class="ev-time mono">11-25 周三 21:30</div></div>
+              <div class="ecd mono" data-cd="2026-11-25T21:30:00+08:00">—</div>
+            </div>
+            <div class="ov-event">
+              <div class="ev-main"><div class="ev-name">非农就业 + 失业率 (11月)</div><div class="ev-time mono">12-04 周五 21:30</div></div>
+              <div class="ecd mono" data-cd="2026-12-04T21:30:00+08:00">—</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="list-title">最新数据一览</h3>
+        <div class="ov-list" id="overviewList"></div>
+      </section>
+
+      <!-- ================= 利率 ================= -->
+      <section class="panel" id="panel-rate" role="tabpanel">
+        <div class="stat-row">
+          <div class="stat-box">
+            <div class="label">联邦基金利率 · 目标区间</div>
+            <div class="num mono">3.75% – 4.00%</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">下次 FOMC 会议 · 2026-12-10 03:00</div>
+            <div class="num mono" data-cd="2026-12-10T03:00:00+08:00" style="font-size:24px">—</div>
+            <div class="sub">含经济预测与新闻发布会</div>
+          </div>
+        </div>
+
+        <div class="panel-box" style="margin-bottom:16px">
+          <div class="pb-head">
+            <div>
+              <div class="card-title">12 月 FOMC 结果概率</div>
+            </div>
+            <span class="badge red">利空</span>
+          </div>
+          <div class="prob-row"><span class="plabel">加息 25bp (4.00%-4.25%)</span><span class="bar"><i style="width:88.5%"></i></span><span class="pval mono">88.5%</span></div>
+          <div class="prob-row"><span class="plabel">加息 50bp (4.25%-4.50%)</span><span class="bar"><i style="width:11.5%"></i></span><span class="pval mono">11.5%</span></div>
+          <div class="prob-row"><span class="plabel">维持不变 / 降息</span><span class="bar"><i class="grey" style="width:0%"></i></span><span class="pval mono">0%</span></div>
+        </div>
+
+        <div class="grid" id="rateGrid" style="margin-bottom:16px"></div>
+
+        <div class="panel-box note-rows">
+          <p><b>上次决议：</b>10-28 维持 3.75%-4.00%（10:2 通过，Cook 与 Hammack 主张立即加息）。</p>
+          <p><b>主席与点阵图：</b>美联储主席 Kevin Warsh；9 月 SEP 年底利率中位值 4.1%。</p>
+          <p><b>静默期：</b>11-28 至 12-10 官员停止公开讲话，市场定价完全取决于数据。</p>
+        </div>
+      </section>
+
+      <!-- ================= 通胀 ================= -->
+      <section class="panel" id="panel-inflation" role="tabpanel">
+        <div class="grid" id="grid-inflation"></div>
+      </section>
+
+      <!-- ================= 就业 ================= -->
+      <section class="panel" id="panel-jobs" role="tabpanel">
+        <div class="grid" id="grid-jobs"></div>
+      </section>
+
+      <!-- ================= 市场 ================= -->
+      <section class="panel" id="panel-growth" role="tabpanel">
+        <div class="grid" id="grid-growth"></div>
+      </section>
+
+      <!-- ================= 日历 ================= -->
+      <section class="panel" id="panel-calendar" role="tabpanel">
+        <div class="cal-month-label">2026年 11月</div>
+        <div class="cal-table">
+          <div class="cal-row" data-goto="jobs" data-target="card-icsa" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">11-19 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-11-19T21:30:00+08:00">—</span></div><span class="c-ev">初请失业金人数<span class="note">每周四公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">20.0万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row imp-high" data-goto="inflation" data-target="card-pcepi" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">11-25 21:30<span class="wk">周三</span></span><span class="c-cd mono" data-cd="2026-11-25T21:30:00+08:00">—</span></div><span class="c-ev">PCE 物价指数（10 月）<span class="note">美联储最看重的通胀指标</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+0.49%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="growth" data-target="card-gdp" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">11-25 21:30<span class="wk">周三</span></span><span class="c-cd mono" data-cd="2026-11-25T21:30:00+08:00">—</span></div><span class="c-ev">GDP 三季度修正值<span class="note">与 PCE 同一时间公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+3.4%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">11-26 03:00<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-11-26T03:00:00+08:00">—</span></div><span class="c-ev">美联储褐皮书<span class="note">12 个联储辖区的经济景气调查</span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="jobs" data-target="card-icsa" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">11-26 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-11-26T21:30:00+08:00">—</span></div><span class="c-ev">初请失业金人数</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">20.0万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">11-28 起<span class="wk">周六</span></span><span class="c-cd mono" data-cd="2026-11-28T00:00:00+08:00">—</span></div><span class="c-ev">美联储静默期开始<span class="note">至 12-10 议息会议，官员不公开讲话</span></span></div></div>
+        </div>
+        <div class="cal-month-label">2026年 12月</div>
+        <div class="cal-table">
+          <div class="cal-row" data-goto="jobs" data-target="card-jolts" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-01 23:00<span class="wk">周二</span></span><span class="c-cd mono" data-cd="2026-12-01T23:00:00+08:00">—</span></div><span class="c-ev">JOLTS 职位空缺（10 月）</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">752.3万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="growth" data-target="card-ism-mfg" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-01 23:00<span class="wk">周二</span></span><span class="c-cd mono" data-cd="2026-12-01T23:00:00+08:00">—</span></div><span class="c-ev">ISM 制造业 PMI（11 月）<span class="note">每月第一个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">55.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">54.6</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="jobs" data-target="card-icsa" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-03 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-03T21:30:00+08:00">—</span></div><span class="c-ev">初请失业金人数</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">20.0万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="growth" data-target="card-ism-svc" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-03 23:00<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-03T23:00:00+08:00">—</span></div><span class="c-ev">ISM 服务业 PMI（11 月）<span class="note">每月第三个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">54.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">54.8</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row imp-high" data-goto="jobs" data-target="card-payems" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-04 21:30<span class="wk">周五</span></span><span class="c-cd mono" data-cd="2026-12-04T21:30:00+08:00">—</span></div><span class="c-ev">非农就业 + 失业率 + 平均时薪（11 月）</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+16.5万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row imp-core" data-goto="rate" data-target="card-ffr" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-10 03:00<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-10T03:00:00+08:00">—</span></div><span class="c-ev">FOMC 利率决议 + 点阵图 + 经济预测汇总<span class="note">市场定价加息概率 100%</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">3.75%-4.00%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-10 03:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-10T03:30:00+08:00">—</span></div><span class="c-ev">美联储主席新闻发布会<span class="note">措辞比决议本身更能影响市场</span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row imp-high" data-goto="inflation" data-target="card-cpiaucsl" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-10 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-10T21:30:00+08:00">—</span></div><span class="c-ev">CPI 通胀（11 月）<span class="note">注意：这次 CPI 在议息会议之后才公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+0.35%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">+0.30%</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="jobs" data-target="card-icsa" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-10 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-10T21:30:00+08:00">—</span></div><span class="c-ev">初请失业金人数</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">20.0万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="inflation" data-target="card-ppiaco" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-15 21:30<span class="wk">周二</span></span><span class="c-cd mono" data-cd="2026-12-15T21:30:00+08:00">—</span></div><span class="c-ev">PPI 生产者价格指数（11 月）</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+0.35%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="jobs" data-target="card-icsa" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-17 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-17T21:30:00+08:00">—</span></div><span class="c-ev">初请失业金人数</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">20.0万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="growth" data-target="card-retail" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12 月中旬<span class="wk">日期未定</span></span><span class="c-cd dim">日期未定</span></div><span class="c-ev">零售销售（11 月）<span class="note">每月中旬公布，无固定日期</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+0.77%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row imp-high" data-goto="inflation" data-target="card-pcepi" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-23 21:30<span class="wk">周三</span></span><span class="c-cd mono" data-cd="2026-12-23T21:30:00+08:00">—</span></div><span class="c-ev">PCE 物价指数（11 月）</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+0.49%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="growth" data-target="card-gdp" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-23 21:30<span class="wk">周三</span></span><span class="c-cd mono" data-cd="2026-12-23T21:30:00+08:00">—</span></div><span class="c-ev">GDP 三季度终值<span class="note">与 PCE 同一时间公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+3.4%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="jobs" data-target="card-icsa" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-24 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-24T21:30:00+08:00">—</span></div><span class="c-ev">初请失业金人数</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">20.0万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row imp-high"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-31 03:00<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-31T03:00:00+08:00">—</span></div><span class="c-ev">FOMC 会议纪要<span class="note">预计时点（会后约三周），以美联储官网为准</span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="jobs" data-target="card-icsa" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-31 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-31T21:30:00+08:00">—</span></div><span class="c-ev">初请失业金人数</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">20.0万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+        </div>
+        <div class="cal-month-label">2027年 1月</div>
+        <div class="cal-table">
+          <div class="cal-row" data-goto="jobs" data-target="card-icsa" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">01-07 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2027-01-07T21:30:00+08:00">—</span></div><span class="c-ev">初请失业金人数</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">20.0万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row imp-high" data-goto="jobs" data-target="card-payems" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">01-08 21:30<span class="wk">周五</span></span><span class="c-cd mono" data-cd="2027-01-08T21:30:00+08:00">—</span></div><span class="c-ev">非农就业 + 失业率（12 月）</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+16.5万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row imp-high" data-goto="inflation" data-target="card-cpiaucsl" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">01-13 21:30<span class="wk">周三</span></span><span class="c-cd mono" data-cd="2027-01-13T21:30:00+08:00">—</span></div><span class="c-ev">CPI 通胀（12 月）</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+0.35%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">+0.30%</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">01-14 03:00<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2027-01-14T03:00:00+08:00">—</span></div><span class="c-ev">美联储褐皮书</span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="jobs" data-target="card-icsa" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">01-14 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2027-01-14T21:30:00+08:00">—</span></div><span class="c-ev">初请失业金人数</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">20.0万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row imp-core" data-goto="rate" data-target="card-ffr" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">01-28 03:00<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2027-01-28T03:00:00+08:00">—</span></div><span class="c-ev">FOMC 利率决议<span class="note">2027 年第一次议息会议</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">3.75%-4.00%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="growth" data-target="card-ism-mfg" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">1 月首个工作日 23:00</span><span class="c-cd dim">日期未定</span></div><span class="c-ev">ISM 制造业 PMI（12 月）<span class="note">按 ISM 惯例：每月第一个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">55.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">54.6</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="list-divider" aria-hidden="true"></div>
+          <div class="cal-row" data-goto="growth" data-target="card-ism-svc" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">1 月第三个工作日 23:00</span><span class="c-cd dim">日期未定</span></div><span class="c-ev">ISM 服务业 PMI（12 月）<span class="note">按 ISM 惯例：每月第三个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">54.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">54.8</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+        </div>
+        <p class="foot-note">美元指数为广义贸易加权美元指数，与 ICE 美元指数（DXY）口径不同。</p>
+      </section>
+
+      <div class="foot-note" id="dataUpdated">数据最后更新：2026-11-15 · 内置基准数据</div>
+    </div>
+    <div class="sheet-mask" id="sheetMask" hidden></div>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="指标详情" hidden>
+      <div class="sheet-grab" id="sheetGrab"><span class="sheet-handle"></span></div>
+      <div class="sheet-body" id="sheetBody"></div>
+    </div>
+    <script>
+      /* ============ 真实走势数据（FRED，抓取于 2026-11-15） ============ */
+      var SERIES = {
+        cpi:     [0.29,0.28,0.34,0.43,0.23,0.03,0.16,0.10,0.25,0.23,0.35,0.30,null,0.30,0.17,0.27,0.87,0.64,0.47,-0.42,0.07,0.40,0.65,0.35],
+        corecpi: [0.31,0.29,0.19,0.43,0.25,0.07,0.24,0.13,0.23,0.31,0.31,0.22,null,0.23,0.30,0.22,0.20,0.38,0.21,-0.02,0.22,0.29,0.33,0.30],
+        pce:     [0.27,0.15,0.26,0.35,0.28,0.08,0.23,0.19,0.25,0.14,0.25,0.29,0.15,0.20,0.32,0.30,0.35,0.63,0.44,0.44,-0.10,0.06,0.32,0.49],
+        corepce: [0.29,0.14,0.17,0.33,0.32,0.11,0.30,0.23,0.25,0.18,0.22,0.23,0.18,0.16,0.32,0.40,0.34,0.26,0.28,0.31,0.13,0.14,0.26,0.32],
+        ppi:     [0.10,0.41,0.63,0.17,-0.12,-0.27,0.34,0.16,0.81,-0.18,0.61,0.13,0.41,0.36,0.58,0.48,0.78,1.08,0.52,-0.13,0.10,0.41,1.41,0.35],
+        coreppi: [0.00,0.32,0.56,0.17,0.18,-0.21,0.38,0.11,0.79,-0.19,0.52,0.30,0.25,0.51,0.83,0.29,0.29,0.74,-0.01,0.43,0.28,0.19,0.82,0.33],
+        payems:  [134,237,-48,42,67,108,13,-20,64,-70,76,-140,41,-17,160,-156,214,148,63,31,-10,186,60,165],
+        unrate:  [4.1,4.2,4.1,4.0,4.2,4.2,4.2,4.3,4.1,4.3,4.3,4.4,4.5,4.4,4.3,4.4,4.3,4.3,4.3,4.2,4.1,4.1,4.2,4.1],
+        wage:    [4.18,4.08,3.97,4.11,4.21,3.91,3.98,3.86,3.96,3.98,3.85,3.92,3.93,3.73,3.66,3.70,3.43,3.57,3.34,3.38,3.21,3.11,3.16,3.12],
+        icsa:    [21.2,21.2,24.1,22.0,23.9,24.4,23.1,21.9,23.6,22.5,22.1,21.6,20.3,23.0,21.4,20.3,19.0,22.5,21.7,19.8,20.7,19.9,19.1,20.0],
+        jolts:   [737.9,756.6,729.5,743.1,724.2,695.2,709.8,731.0,720.4,708.9,691.9,716.9,717.0,684.6,655.0,724.0,692.2,688.7,758.5,753.7,718.2,733.5,719.0,752.3],
+        gdp:     [2.4,0.1,4.0,3.9,0.2,2.5,2.2,3.4],
+        retail:  [0.86,0.57,0.89,-0.68,-0.48,1.61,0.10,-1.43,0.93,0.92,0.30,0.08,-0.02,0.67,0.11,-0.62,0.87,1.66,0.59,1.04,0.20,-0.41,1.29,0.77],
+        ffr:     [4.50,4.50,4.50,4.50,4.50,4.50,4.50,4.50,4.50,4.25,4.00,4.00,3.75,3.75,3.75,3.75,3.75,3.75,3.75,3.75,3.75,4.00,4.00,4.00],
+        dgs2:    [4.25,4.22,3.99,3.89,3.60,3.89,3.72,3.94,3.59,3.60,3.60,3.47,3.47,3.52,3.38,3.79,3.88,3.98,4.14,4.28,4.34,4.88,4.56,4.86],
+        dgs10:   [4.58,4.58,4.24,4.23,4.17,4.41,4.24,4.37,4.23,4.16,4.11,4.02,4.18,4.26,3.97,4.30,4.40,4.45,4.44,4.75,4.75,5.29,4.94,5.10],
+        usd:     [129.28,128.48,128.28,126.71,122.59,121.77,119.41,121.72,120.21,120.14,121.39,121.05,119.75,117.90,117.82,121.03,118.67,118.88,120.92,119.70,118.57,120.97,121.67,121.88]
+      };
+
+      /* ============ 指标卡片数据（最新值截至 2026-11-15） ============ */
+      var CARDS = [
+        /* ---- 通胀 ---- */
+        { tab:"inflation", name:"CPI 消费者价格指数", period:"10月", badge:["red","利空"], big:"+0.35%", unit:"环比", short:"环比 +0.35%",
+          compare:[["预期","+0.30%"],["前值","+0.65%"],["同比","+4.08%"]],
+          series:"cpi", fmt:"pct", range:["2024-11","2026-10"], cap:"近 24 个月",
+          explain:"消费端物价，超预期强化加息预期",
+          nextLabel:"下次公布", nextText:"2026-12-10 21:30", nextISO:"2026-12-10T21:30:00+08:00",
+          },
+        { tab:"inflation", name:"核心 CPI", period:"10月", badge:["red","利空"], big:"+0.30%", unit:"环比", short:"环比 +0.30%",
+          compare:[["预期","+0.20%"],["前值","+0.33%"],["同比","+2.87%"]],
+          series:"corecpi", fmt:"pct", range:["2024-11","2026-10"], cap:"近 24 个月",
+          explain:"剔除食品能源，看底层通胀黏性",
+          nextLabel:"下次公布", nextText:"2026-12-10 21:30", nextISO:"2026-12-10T21:30:00+08:00",
+          },
+        { tab:"inflation", name:"PCE 物价指数", period:"9月", badge:["red","利空"], big:"+0.49%", unit:"环比", short:"环比 +0.49%",
+          compare:[["前值","+0.32%"],["同比","+3.65%"]],
+          series:"pce", fmt:"pct", range:["2024-10","2026-09"], cap:"近 24 个月",
+          explain:"美联储最看重的通胀口径",
+          nextLabel:"下次公布", nextText:"2026-11-25 21:30", nextISO:"2026-11-25T21:30:00+08:00",
+          },
+        { tab:"inflation", name:"核心 PCE", period:"9月", badge:["red","偏利空"], big:"+0.32%", unit:"环比", short:"环比 +0.32%",
+          compare:[["前值","+0.26%"],["同比","+3.12%"]],
+          series:"corepce", fmt:"pct", range:["2024-10","2026-09"], cap:"近 24 个月",
+          explain:"美联储首选指标，仍高于2%目标",
+          nextLabel:"下次公布", nextText:"2026-11-25 21:30", nextISO:"2026-11-25T21:30:00+08:00",
+          },
+        { tab:"inflation", name:"PPI 生产者价格指数", period:"10月", badge:["red","利空"], big:"+0.35%", unit:"环比", short:"环比 +0.35%",
+          compare:[["前值","+1.41%"],["同比","+6.52%"]],
+          series:"ppi", fmt:"pct", range:["2024-11","2026-10"], cap:"近 24 个月",
+          explain:"出厂价是CPI上游，成本压力仍在",
+          nextLabel:"下次公布", nextText:"2026-12-15 21:30", nextISO:"2026-12-15T21:30:00+08:00",
+          },
+        { tab:"inflation", name:"核心 PPI", period:"10月", badge:["red","偏利空"], big:"+0.33%", unit:"环比", short:"环比 +0.33%",
+          compare:[["前值","+0.82%"],["同比","+5.04%"]],
+          series:"coreppi", fmt:"pct", range:["2024-11","2026-10"], cap:"近 24 个月",
+          explain:"上游核心通胀放缓，同比仍高",
+          nextLabel:"下次公布", nextText:"2026-12-15 21:30", nextISO:"2026-12-15T21:30:00+08:00",
+          },
+        /* ---- 就业 ---- */
+        { tab:"jobs", name:"非农就业人数", period:"10月", badge:["red","利空"], big:"+16.5", unit:"万人新增", short:"新增 16.5 万人",
+          compare:[["预期","高于预期"],["前值","+6.0 万人"]],
+          series:"payems", fmt:"int", range:["2024-11","2026-10"], cap:"近 24 个月",
+          explain:"新增就业超预期，就业过热强化加息",
+          nextLabel:"下次公布", nextText:"2026-12-04 21:30", nextISO:"2026-12-04T21:30:00+08:00",
+          },
+        { tab:"jobs", name:"失业率", period:"10月", badge:["red","偏利空"], big:"4.1%", unit:"", short:"4.1%",
+          compare:[["前值","4.2%"],["变动","-0.1 个百分点"]],
+          series:"unrate", fmt:"one", range:["2024-11","2026-10"], cap:"近 24 个月",
+          explain:"失业率下降，就业仍紧绷偏利空",
+          nextLabel:"下次公布", nextText:"2026-12-04 21:30", nextISO:"2026-12-04T21:30:00+08:00",
+          },
+        { tab:"jobs", name:"平均时薪", period:"10月", badge:["amber","中性"], big:"$38.00", unit:"", short:"$38.00",
+          compare:[["环比","+0.37%"],["同比","+3.12%"],["前值","$37.86"]],
+          series:"wage", fmt:"pct", range:["2024-11","2026-10"], cap:"近 24 个月",
+          explain:"工资增速温和，无通胀螺旋迹象",
+          nextLabel:"下次公布", nextText:"2026-12-04 21:30", nextISO:"2026-12-04T21:30:00+08:00",
+          },
+        { tab:"jobs", name:"初请失业金人数", period:"11-07 当周", badge:["green","偏利多"], big:"20.0", unit:"万人", short:"20.0 万人",
+          compare:[["前值","19.1 万人"],["变动","+0.9 万人"]],
+          series:"icsa", fmt:"one", range:["2024-12","2026-11"], cap:"近 24 个月",
+          explain:"企业少裁员，紧张边际略有松动",
+          nextLabel:"下次公布", nextText:"2026-11-19 21:30", nextISO:"2026-11-19T21:30:00+08:00",
+          },
+        { tab:"jobs", name:"JOLTS 职位空缺", period:"9月", badge:["red","利空"], big:"752.3", unit:"万个", short:"752.3 万个",
+          compare:[["前值","719.0 万个"],["变动","+33.3 万个"]],
+          series:"jolts", fmt:"one", range:["2024-10","2026-09"], cap:"近 24 个月",
+          explain:"空缺反增，企业抢人压力难消",
+          nextLabel:"下次公布", nextText:"2026-12-01 23:00", nextISO:"2026-12-01T23:00:00+08:00",
+          },
+        /* ---- 市场 ---- */
+        { tab:"growth", name:"GDP 季度增速", period:"三季度 · 初值", badge:["red","偏利空"], big:"+3.4%", unit:"年化", short:"年化 +3.4%",
+          compare:[["前值","+2.2%（二季度）"]],
+          series:"gdp", fmt:"pct", range:["2024Q4","2026Q3"], cap:"近 8 个季度",
+          explain:"增长强劲，美联储没有停手理由",
+          nextLabel:"修正值公布", nextText:"2026-11-25 21:30", nextISO:"2026-11-25T21:30:00+08:00",
+          },
+        { tab:"growth", name:"零售销售", period:"9月", badge:["red","偏利空"], big:"+0.77%", unit:"环比", short:"环比 +0.77%",
+          compare:[["同比","+6.29%"],["前值","+1.29%"]],
+          series:"retail", fmt:"pct", range:["2024-10","2026-09"], cap:"近 24 个月",
+          explain:"消费占七成，数据强劲强化加息预期",
+          nextLabel:"下次公布", nextText:"每月中旬 · 无固定日期", nextISO:null,
+          },
+        { tab:"growth", name:"ISM 制造业 PMI", period:"10月", badge:["red","偏利空"], big:"55.5", unit:"", short:"55.5",
+          compare:[["预期","54.6"],["前值","54.5"],["物价分项","75.2"]],
+          series:null, fmt:"one", range:null, cap:"",
+          explain:"扩张超预期，物价分项高企偏利空 · FRED 无此序列",
+          nextLabel:"下次公布", nextText:"2026-12-01 23:00", nextISO:"2026-12-01T23:00:00+08:00",
+          },
+        { tab:"growth", name:"ISM 服务业 PMI", period:"10月", badge:["green","偏利多"], big:"54.5", unit:"", short:"54.5",
+          compare:[["预期","54.8"],["前值","54.9"],["物价分项","73.0"]],
+          series:null, fmt:"one", range:null, cap:"",
+          explain:"扩张边际放缓，服务物价仍黏 · FRED 无此序列",
+          nextLabel:"下次公布", nextText:"2026-12-03 23:00", nextISO:"2026-12-03T23:00:00+08:00",
+          },
+        { tab:"growth", name:"2 年期美债收益率", period:"11-12", badge:["red","偏利空"], big:"4.86%", unit:"", short:"4.86%",
+          compare:[["前值","4.73%（前一交易日）"]],
+          series:"dgs2", fmt:"two", range:["2024-12","2026-11"], cap:"近 24 个月",
+          explain:"市场版美联储预期，上行压资产",
+          nextLabel:"更新频率", nextText:"每个交易日", nextISO:null,
+          },
+        { tab:"growth", name:"10 年期美债收益率", period:"11-12", badge:["red","偏利空"], big:"5.10%", unit:"", short:"5.10%",
+          compare:[["前值","4.98%（前一交易日）"]],
+          series:"dgs10", fmt:"two", range:["2024-12","2026-11"], cap:"近 24 个月",
+          explain:"全球定价之锚，高位压制估值",
+          nextLabel:"更新频率", nextText:"每个交易日", nextISO:null,
+          },
+        { tab:"growth", name:"美元指数", period:"11-06", badge:["amber","中性"], big:"121.88", unit:"", short:"121.88",
+          compare:[["前值","121.51（11-05）"]],
+          series:"usd", fmt:"two", range:["2024-12","2026-11"], cap:"近 24 个月",
+          explain:"广义贸易加权美元，非 DXY",
+          nextLabel:"更新频率", nextText:"每周（H.10）", nextISO:null,
+          }
+      ];
+
+      var RATE_CARD = { name:"联邦基金利率上限 ·", period:"月末值", badge:["red","利空"], big:"4.00%", unit:"上限", short:"",
+        compare:[["当前区间","3.75% – 4.00%"],["SEP 年底中位","4.1%"]],
+        series:"ffr", fmt:"two", range:["2024-12","2026-11"], cap:"近 24 个月",
+        explain:"台阶上行即加息，重回加息通道",
+        nextLabel:"下次 FOMC", nextText:"2026-12-10 03:00", nextISO:"2026-12-10T03:00:00+08:00",
+        };
+
+      /* ============ 指标元数据：数值 / 预期 / 前值（动态定调与抽屉、日历联动的数据底座） ============
+         kind: hot = 越高越鹰（通胀/就业过热类）；inverse = 越高越鸽（失业率/初请）；
+         floor = 衰退/荣枯阈值，最新值跌穿时不按降温利多处理。 */
+      var DATA_UPDATED = "2026-11-15";
+      var LIVE_ON = false;
+      var CME = { h25: 88.5, h50: 11.5, hold: 0 };
+      var META = {
+        cpi:     { value: 0.35, prev: 0.65, expected: 0.30, yoy: 4.08, kind: "hot", tol: 0.03, disp: "pct2", sp: "环比 " },
+        corecpi: { value: 0.30, prev: 0.33, expected: 0.20, yoy: 2.87, kind: "hot", tol: 0.03, disp: "pct2", sp: "环比 " },
+        pce:     { value: 0.49, prev: 0.32, expected: null, yoy: 3.65, kind: "hot", tol: 0.03, disp: "pct2", sp: "环比 " },
+        corepce: { value: 0.32, prev: 0.26, expected: null, yoy: 3.12, kind: "hot", tol: 0.03, disp: "pct2", sp: "环比 " },
+        ppi:     { value: 0.35, prev: 1.41, expected: null, yoy: 6.52, kind: "hot", tol: 0.03, disp: "pct2", sp: "环比 " },
+        coreppi: { value: 0.33, prev: 0.82, expected: null, yoy: 5.04, kind: "hot", tol: 0.03, disp: "pct2", sp: "环比 " },
+        payems:  { value: 16.5, prev: 6.0, expected: null, yoy: null, kind: "hot", tol: 2, disp: "payems", floor: 0, sp: "新增 ", sq: " 万人", cp: " 万人", cal: "万" },
+        unrate:  { value: 4.1, prev: 4.2, expected: null, yoy: null, kind: "inverse", tol: 0.05, disp: "pct1" },
+        wage:    { value: 38.00, prev: 37.86, expected: null, yoy: 3.12, kind: "hot", tol: 0.15, disp: "usd" },
+        icsa:    { value: 20.0, prev: 19.1, expected: null, yoy: null, kind: "inverse", tol: 0.5, disp: "wan1", sq: " 万人", cp: " 万人", cal: "万" },
+        jolts:   { value: 752.3, prev: 719.0, expected: null, yoy: null, kind: "hot", tol: 5, disp: "wan1", sq: " 万个", cp: " 万个", cal: "万" },
+        gdp:     { value: 3.4, prev: 2.2, expected: null, yoy: null, kind: "hot", tol: 0.2, disp: "pct1s", floor: 0, sp: "年化 " },
+        retail:  { value: 0.77, prev: 1.29, expected: null, yoy: 6.29, kind: "hot", tol: 0.05, disp: "pct2", sp: "环比 " },
+        "ism-mfg": { value: 55.5, prev: 54.5, expected: 54.6, yoy: null, kind: "hot", tol: 0.3, disp: "num1", floor: 50 },
+        "ism-svc": { value: 54.5, prev: 54.9, expected: 54.8, yoy: null, kind: "hot", tol: 0.3, disp: "num1", floor: 50 },
+        dgs2:    { value: 4.86, prev: 4.73, expected: null, yoy: null, kind: "hot", tol: 0.05, disp: "pct2u" },
+        dgs10:   { value: 5.10, prev: 4.98, expected: null, yoy: null, kind: "hot", tol: 0.05, disp: "pct2u" },
+        usd:     { value: 121.88, prev: 121.51, expected: null, yoy: null, kind: "hot", tol: 0.5, disp: "num2" },
+        ffr:     { value: 4.00, prev: 3.75, expected: null, yoy: null, kind: "hot", tol: 0.01, disp: "range" }
+      };
+      function metaOf(c) {
+        if (c.series) return c.series;
+        return c.name.indexOf("制造") >= 0 ? "ism-mfg" : "ism-svc";
+      }
+      function metaSp(m) { return m.sp || ""; }
+      function metaSq(m) { return m.sq || ""; }
+      function metaCp(m) { return m.cp || ""; }
+      /* 核心数值格式（不带单位词，与卡片大字/概览数值口径一致） */
+      function fmtCore(m, v) {
+        if (v === null || v === undefined) return "—";
+        switch (m.disp) {
+          case "pct2": return (v > 0 ? "+" : "") + v.toFixed(2) + "%";
+          case "pct1s": return (v > 0 ? "+" : "") + v.toFixed(1) + "%";
+          case "pct1": return v.toFixed(1) + "%";
+          case "pct2u": return v.toFixed(2) + "%";
+          case "payems": return (v > 0 ? "+" : "") + v.toFixed(1);
+          case "wan1": case "num1": return v.toFixed(1);
+          case "num2": return v.toFixed(2);
+          case "usd": return "$" + v.toFixed(2);
+          case "range": return v.toFixed(2) + "%";
+        }
+        return String(v);
+      }
+      /* 预期差优先的动态定调：有预期用「实际 - 预期」，无预期退化为「最新 - 前值」 */
+      function dynStatus(m) {
+        if (!m) return null;
+        var basis = (m.expected !== null && m.expected !== undefined) ? m.expected : m.prev;
+        if (basis === null || basis === undefined) return null;
+        var diff = m.value - basis;
+        if (Math.abs(diff) <= m.tol) return { cls: "amber", label: "中性", soft: false };
+        var strong = Math.abs(diff) > m.tol * 3;
+        var bearish;
+        if (m.floor !== undefined && m.value < m.floor) bearish = true;
+        else if (m.kind === "inverse") bearish = diff < 0;
+        else bearish = diff > 0;
+        if (bearish) return strong ? { cls: "red", label: "利空", soft: false } : { cls: "red", label: "偏利空", soft: true };
+        return strong ? { cls: "green", label: "利多", soft: false } : { cls: "green", label: "偏利多", soft: false };
+      }
+      function badgeSpan(st, extraCls) {
+        return '<span class="badge ' + st.cls + (extraCls || "") + (st.soft ? " soft" : "") + '">' + st.label + "</span>";
+      }
+
+      /* ============ 数据源：优先 GitHub Raw 公开文件（全开放 CORS、无 Key），失败降级本地缓存，再降级内置基准 ============ */
+      var MACRO_REMOTE_URL = "https://raw.githubusercontent.com/Veyrille/macro-terminal/main/public/macro_data.json";
+      var MACRO_LOCAL_URL = "./macro_data.json";
+      var LIVE_SOURCE = "";
+      function applyLiveData(j) {
+        if (!j || (!j.series && !j.manual_overrides && !j.overrides && !j.expectations && !j.ism && !j.cme_fedwatch)) return false;
+        var map = { CPIAUCSL: "cpi", CPILFESL: "corecpi", PCEPI: "pce", PCEPILFE: "corepce",
+          PPIFIS: "ppi", PPIFES: "coreppi", PAYEMS: "payems", UNRATE: "unrate",
+          CES0500000003: "wage", ICSA: "icsa", JTSJOL: "jolts", A191RL1Q225SBEA: "gdp",
+          RSAFS: "retail", DFEDTARU: "ffr", DGS2: "dgs2", DGS10: "dgs10", DTWEXBGS: "usd" };
+        Object.keys(map).forEach(function (code) {
+          var sd = j.series ? j.series[code] : null, key = map[code];
+          if (!sd) return;
+          if (sd.history && sd.history.length) {
+            SERIES[key] = sd.history.map(function (h) { return (h && typeof h === "object") ? h.value : h; });
+          }
+          var m = META[key];
+          if (!m) return;
+          if (key === "wage") {
+            /* FRED CES0500000003 经脚本按环比/同比口径输出，latest 为同比%，不覆盖 $ 时薪水平 */
+            if (typeof sd.latest === "number") m.yoy = sd.latest;
+            return;
+          }
+          if (key === "payems") {
+            /* 口径归一：脚本输出为万人、旧基准文件为千人（数值 >50 判定），META 统一用万人 */
+            if (typeof sd.latest === "number") m.value = sd.latest > 50 ? sd.latest / 10 : sd.latest;
+            if (typeof sd.prev === "number") m.prev = sd.prev > 50 ? sd.prev / 10 : sd.prev;
+          } else {
+            if (typeof sd.latest === "number") m.value = sd.latest;
+            if (typeof sd.prev === "number") m.prev = sd.prev;
+          }
+          if (typeof sd.yoy === "number") m.yoy = sd.yoy;
+        });
+        var ov = j.manual_overrides || j.overrides || {};
+        /* 市场预期：新版 overrides 用 expectations（复数），兼容旧版 expected（单数）与顶层字段 */
+        var expMap = ov.expectations || ov.expected || j.expectations || null;
+        if (expMap) Object.keys(expMap).forEach(function (k) {
+          var key = map[k] || k;
+          if (META[key] && typeof expMap[k] === "number") META[key].expected = expMap[k];
+        });
+        /* ISM 制造业 / 服务业：来自 overrides.ism，FRED 无此序列，靠手动覆写带入 */
+        var ism = ov.ism || j.ism || null;
+        if (ism) {
+          var im = ism.manufacturing, isv = ism.services;
+          if (im) {
+            if (typeof im.value === "number") META["ism-mfg"].value = im.value;
+            if (typeof im.prev === "number") META["ism-mfg"].prev = im.prev;
+            if (typeof im.expected === "number") META["ism-mfg"].expected = im.expected;
+          }
+          if (isv) {
+            if (typeof isv.value === "number") META["ism-svc"].value = isv.value;
+            if (typeof isv.prev === "number") META["ism-svc"].prev = isv.prev;
+            if (typeof isv.expected === "number") META["ism-svc"].expected = isv.expected;
+          }
+        }
+        /* CME FedWatch：新版 overrides 用 cme_fedwatch.outcomes 数组，按文案识别 25bp / 50bp / 维持 */
+        var fw = ov.cme_fedwatch || j.cme_fedwatch || null;
+        if (fw && fw.outcomes) fw.outcomes.forEach(function (o) {
+          if (!o || typeof o.prob !== "number" || !o.label) return;
+          if (o.label.indexOf("50bp") >= 0) CME.h50 = o.prob;
+          else if (o.label.indexOf("25bp") >= 0) CME.h25 = o.prob;
+          else if (o.label.indexOf("维持") >= 0 || o.label.indexOf("降息") >= 0) CME.hold = o.prob;
+        });
+        if (ov.cme) {
+          if (typeof ov.cme.hike25 === "number") CME.h25 = ov.cme.hike25;
+          if (typeof ov.cme.hike50 === "number") CME.h50 = ov.cme.hike50;
+          if (typeof ov.cme.hold === "number") CME.hold = ov.cme.hold;
+        }
+        if (j.updated_at_bjt) {
+          DATA_UPDATED = j.updated_at_bjt;
+          var bd = document.querySelector(".base-date");
+          if (bd) bd.textContent = "数据更新 " + String(j.updated_at_bjt).slice(0, 10);
+        }
+        LIVE_ON = true;
+        return true;
+      }
+      function fetchMacroJson(url) {
+        return fetch(url + "?t=" + Date.now()).then(function (r) {
+          if (!r.ok) throw new Error("macro_data " + r.status);
+          return r.json();
+        });
+      }
+      function loadMacroData() {
+        try {
+          /* 第一优先：GitHub 仓库 Raw 文件（Public 仓库原生全开放 CORS，Actions 更新后打开/下拉即读最新） */
+          return fetchMacroJson(MACRO_REMOTE_URL).then(function (j) {
+            LIVE_SOURCE = "GitHub";
+            if (applyLiveData(j)) renderAll();
+          }).catch(function () {
+            /* 第二优先：同目录本地缓存（本地预览 / GitHub 暂不可达时兜底） */
+            return fetchMacroJson(MACRO_LOCAL_URL).then(function (j) {
+              LIVE_SOURCE = "本地缓存";
+              if (applyLiveData(j)) renderAll();
+            }).catch(function () { /* 两路均失败：静默保留内置 2026-11-15 基准数据，不白屏、不报错 */ });
+          });
+        } catch (e) {
+          return Promise.resolve();
+        }
+      }
+
+      /* ============ 走势图（极简 Sparkline + Hover Tooltip） ============ */
+      function fmtVal(fmt, v) {
+        if (fmt === "pct") return (v > 0 ? "+" : "") + v.toFixed(2) + "%";
+        if (fmt === "int") return String(Math.round(v));
+        if (fmt === "one") return v.toFixed(1);
+        return v.toFixed(2);
+      }
+      function genLabels(range, n) {
+        var out = [];
+        if (range[0].indexOf("Q") >= 0) {
+          var y = parseInt(range[0].slice(0, 4), 10), q = parseInt(range[0].slice(5), 10);
+          var qn = ["一", "二", "三", "四"];
+          for (var i = 0; i < n; i++) { out.push(y + "年" + qn[q - 1] + "季度"); q++; if (q > 4) { q = 1; y++; } }
+        } else {
+          var p = range[0].split("-"), yy = parseInt(p[0], 10), mm = parseInt(p[1], 10);
+          for (var j = 0; j < n; j++) { out.push(yy + "年" + mm + "月"); mm++; if (mm > 12) { mm = 1; yy++; } }
+        }
+        return out;
+      }
+      function smoothPath(pts) {
+        if (pts.length < 3) return pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
+        var d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
+        for (var i = 0; i < pts.length - 1; i++) {
+          var p0 = pts[Math.max(i - 1, 0)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(i + 2, pts.length - 1)];
+          var c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+          var c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+          d += "C" + c1x.toFixed(1) + " " + c1y.toFixed(1) + " " + c2x.toFixed(1) + " " + c2y.toFixed(1) + " " + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
+        }
+        return d;
+      }
+      var CHARTS = [];
+      var chartSeq = 0;
+      function drawChart(box, key, fmt, range) {
+        var vals = SERIES[key];
+        /* 缺失点线性插值补齐：折线渲染为一条完整连续曲线（tooltip 仍读原始值） */
+        var disp = vals.slice();
+        var known = [];
+        disp.forEach(function (v, i) { if (v !== null) known.push(i); });
+        if (known.length > 1) {
+          for (var k = 0; k < known.length - 1; k++) {
+            var a = known[k], b = known[k + 1];
+            for (var i = a + 1; i < b; i++) disp[i] = disp[a] + (disp[b] - disp[a]) * (i - a) / (b - a);
+          }
+          for (var e1 = 0; e1 < known[0]; e1++) disp[e1] = disp[known[0]];
+          for (var e2 = known[known.length - 1] + 1; e2 < disp.length; e2++) disp[e2] = disp[known[known.length - 1]];
+        }
+        var nums = disp.filter(function (v) { return v !== null; });
+        var min0 = Math.min.apply(null, nums), max0 = Math.max.apply(null, nums);
+        var mean = nums.reduce(function (a, b) { return a + b; }, 0) / nums.length;
+        var min = min0, max = max0;
+        if (min === max) { min -= 1; max += 1; }
+        var span = max - min; min -= span * 0.15; max += span * 0.15;
+        var W = 300, H = 56, P = 5;
+        function X(i) { return P + i * (W - 2 * P) / (disp.length - 1); }
+        function Y(v) { return H - P - (v - min) / (max - min) * (H - 2 * P); }
+        var pts = disp.map(function (v, i) { return [X(i), Y(v)]; });
+        var lastI = disp.length - 1;
+        var INF_ANCHOR = { cpi: 1, corecpi: 1, pce: 1, corepce: 1, ppi: 1, coreppi: 1 };
+        var anchorV = INF_ANCHOR[key] ? 0.2 : mean;
+        var anchorText = INF_ANCHOR[key] ? "0.2% 基准" : "均值 " + fmtVal(fmt, mean);
+        var anchorY = Math.max(2, Math.min(H - 2, Y(anchorV)));
+        var tone = box.dataset.tone || "";
+        var toneVar = tone === "red" ? "var(--red)" : tone === "green" ? "var(--green)" : tone === "amber" ? "var(--amber)" : "var(--chart)";
+        chartSeq++;
+        var gid = "ag" + chartSeq;
+        var lineD = smoothPath(pts);
+        var areaD = lineD + "L" + X(lastI).toFixed(1) + " " + H + " L" + X(0).toFixed(1) + " " + H + " Z";
+        var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true">';
+        svg += '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--area-top)"/><stop offset="1" style="stop-color:var(--area-bottom)"/></linearGradient></defs>';
+        svg += '<line x1="0" y1="' + anchorY.toFixed(1) + '" x2="' + W + '" y2="' + anchorY.toFixed(1) + '" style="stroke:var(--chart-zero)" stroke-width="0.7" stroke-dasharray="3 3"/>';
+        svg += '<path d="' + areaD + '" fill="url(#' + gid + ')" stroke="none"/>';
+        svg += '<path d="' + lineD + '" fill="none" style="stroke:var(--chart)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>';
+        svg += '<circle cx="' + X(lastI).toFixed(1) + '" cy="' + Y(disp[lastI]).toFixed(1) + '" r="7" style="fill:' + toneVar + '" opacity="0.22"/>';
+        svg += '<circle cx="' + X(lastI).toFixed(1) + '" cy="' + Y(disp[lastI]).toFixed(1) + '" r="3.5" style="fill:' + toneVar + '"/>';
+        svg += "</svg>";
+        box.querySelector(".chart-slot").innerHTML = svg;
+        box.querySelectorAll(".chart-ext, .chart-anchor").forEach(function (n) { n.parentNode.removeChild(n); });
+        var ovBox = document.createElement("div");
+        ovBox.innerHTML = '<span class="chart-ext hi">最高 ' + fmtVal(fmt, max0) + '</span>' +
+          '<span class="chart-ext lo">最低 ' + fmtVal(fmt, min0) + '</span>' +
+          '<span class="chart-anchor" style="top:' + (anchorY / H * 100).toFixed(1) + '%">' + anchorText + "</span>";
+        while (ovBox.firstChild) box.appendChild(ovBox.firstChild);
+        for (var ci = CHARTS.length - 1; ci >= 0; ci--) { if (CHARTS[ci].el === box) CHARTS.splice(ci, 1); }
+        CHARTS.push({ el: box, vals: vals, fmt: fmt, labels: genLabels(range, vals.length),
+          xs: disp.map(function (_, i) { return X(i) / W * 100; }),
+          ys: disp.map(function (v) { return Y(v) / H * 100; }) });
+      }
+
+      /* ============ 卡片唯一 ID（概览行 data-target 与之对应） ============ */
+      var CARD_IDS = {
+        cpi: "card-cpiaucsl", corecpi: "card-cpilfesl", pce: "card-pcepi", corepce: "card-pcepilfe",
+        ppi: "card-ppiaco", coreppi: "card-coreppi", payems: "card-payems", unrate: "card-unrate",
+        wage: "card-wage", icsa: "card-icsa", jolts: "card-jolts", gdp: "card-gdp",
+        retail: "card-retail", dgs2: "card-dgs2", dgs10: "card-dgs10", usd: "card-usd", ffr: "card-ffr"
+      };
+      function cardIdOf(c) {
+        if (c.series) return CARD_IDS[c.series] || ("card-" + c.series);
+        return c.name.indexOf("制造") >= 0 ? "card-ism-mfg" : "card-ism-svc";
+      }
+
+      /* ============ 卡片渲染（四层结构） ============ */
+      function cardHTML(c) {
+        var key = metaOf(c);
+        var m = META[key];
+        var st = m ? dynStatus(m) : null;
+        var badge = st ? badgeSpan(st) : ('<span class="badge ' + c.badge[0] + (c.badge[0] === "red" && c.badge[1].charAt(0) === "偏" ? " soft" : "") + '">' + c.badge[1] + "</span>");
+        var tone = st ? st.cls : c.badge[0];
+        var bigText = m ? fmtCore(m, m.value) : c.big;
+        var parts = c.compare;
+        if (LIVE_ON && m && c.series && key !== "ffr") {
+          parts = [];
+          if (m.expected !== null && m.expected !== undefined) parts.push(["预期", fmtCore(m, m.expected) + metaCp(m)]);
+          if (m.prev !== null && m.prev !== undefined) parts.push(["前值", fmtCore(m, m.prev) + metaCp(m)]);
+          if (m.yoy !== null && m.yoy !== undefined) parts.push(["同比", (m.yoy > 0 ? "+" : "") + m.yoy.toFixed(2) + "%"]);
+        }
+        var compare = parts.map(function (p, i) {
+          return (i ? '<span class="sep">|</span>' : "") + '<span class="cl">' + p[0] + '</span><span class="cv mono">' + p[1] + "</span>";
+        }).join("");
+        var chart;
+        if (c.series) {
+          chart = '<div class="spark" data-series="' + c.series + '" data-fmt="' + c.fmt + '" data-tone="' + tone + '" data-range="' + c.range.join(",") + '">' +
+            '<div class="chart-slot"></div>' +
+            '<div class="hover-dot" hidden></div><div class="tip mono" hidden></div></div>';
+        } else {
+          chart = "";
+        }
+        var foot = "", footCls = "card-foot";
+        if (c.nextISO) {
+          foot = '<div class="' + footCls + '"><span class="fleft">' + c.nextLabel + " " + c.nextText.slice(5) + '</span>' +
+            '<span class="fnext cd">剩余 <span class="mono" data-cd="' + c.nextISO + '">—</span></span></div>';
+        }
+        return '<article class="card" id="' + cardIdOf(c) + '">' +
+          '<div class="card-head"><div><div class="card-title">' + c.name + '<span class="period">' + c.period + '</span></div>' +
+          "</div>" + badge + "</div>" +
+          '<div><div class="big-value mono">' + bigText + (c.unit ? '<span class="unit">' + c.unit + "</span>" : "") + '</div>' +
+          '<div class="compare">' + compare + "</div></div>" +
+          chart +
+          '<p class="explain">' + c.explain + "</p>" +
+          foot +
+          "</article>";
+      }
+      function bindChart(ch) {
+        if (ch.el._bound) return;
+        ch.el._bound = true;
+        var tip = ch.el.querySelector(".tip"), dot = ch.el.querySelector(".hover-dot");
+        function move(e) {
+          var r = ch.el.getBoundingClientRect();
+          var cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+          var frac = Math.max(0, Math.min(1, cx / r.width));
+          var idx = Math.round(frac * (ch.vals.length - 1));
+          var guard = 0;
+          while (ch.vals[idx] === null && guard < ch.vals.length) {
+            idx = (idx + 1) % ch.vals.length; guard++;
+          }
+          if (ch.vals[idx] === null) return;
+          tip.hidden = false; dot.hidden = false;
+          tip.textContent = ch.labels[idx] + " · " + fmtVal(ch.fmt, ch.vals[idx]);
+          var tipHalf = tip.offsetWidth / 2;
+          var cxPx = ch.xs[idx] / 100 * r.width;
+          var clampedPx = Math.max(tipHalf + 2, Math.min(r.width - tipHalf - 2, cxPx));
+          var yPx = ch.ys[idx] / 100 * r.height;
+          tip.style.left = clampedPx + "px";
+          tip.style.top = (yPx < 28 ? (yPx + 12) : (yPx - 36)) + "px";
+          tip.style.transform = "translateX(-50%)";
+          dot.style.left = ch.xs[idx] + "%"; dot.style.top = ch.ys[idx] + "%";
+        }
+        function leave() { tip.hidden = true; dot.hidden = true; }
+        ch.el.addEventListener("mousemove", move);
+        ch.el.addEventListener("mouseleave", leave);
+        ch.el.addEventListener("touchstart", move, { passive: true });
+        ch.el.addEventListener("touchend", leave);
+      }
+      /* CME 概率条：按行内文案识别 25bp / 50bp / 维持三行，两处面板同步 */
+      function updateCME() {
+        document.querySelectorAll(".prob-row").forEach(function (row) {
+          var t = row.textContent, v = null;
+          if (t.indexOf("50bp") >= 0) v = CME.h50;
+          else if (t.indexOf("25bp") >= 0) v = CME.h25;
+          else if (t.indexOf("维持") >= 0) v = CME.hold;
+          if (v === null) return;
+          var bar = row.querySelector(".bar > i"), val = row.querySelector(".pval");
+          if (bar) bar.style.width = v + "%";
+          if (val) val.textContent = (Math.round(v * 10) / 10) + "%";
+        });
+      }
+      /* 日历「前值」动态绑定：按 data-target 反查指标，读当前数据集最新已公布值 */
+      var REV_IDS = {};
+      Object.keys(CARD_IDS).forEach(function (k) { REV_IDS[CARD_IDS[k]] = k; });
+      REV_IDS["card-ism-mfg"] = "ism-mfg";
+      REV_IDS["card-ism-svc"] = "ism-svc";
+      function bindCalPrev() {
+        document.querySelectorAll(".cal-row[data-target]").forEach(function (row) {
+          var key = REV_IDS[row.dataset.target];
+          var m = key ? META[key] : null;
+          if (!m) return;
+          var vv = row.querySelector(".cal-vals .cal-vv");
+          if (!vv) return;
+          if (key === "ffr") vv.textContent = (m.value - 0.25).toFixed(2) + "%-" + m.value.toFixed(2) + "%";
+          else vv.textContent = fmtCore(m, m.value) + (m.cal || "");
+        });
+      }
+
+      /* ============ 概览一览表 ============ */
+      var TABNAME = { inflation: "通胀", jobs: "就业", growth: "市场" };
+      var SUB2 = {
+        "CPI 消费者价格指数": "同比 +4.08%", "核心 CPI": "同比 +2.87%",
+        "PCE 物价指数": "同比 +3.65%", "核心 PCE": "同比 +3.12%",
+        "PPI 生产者价格指数": "同比 +6.52%", "核心 PPI": "同比 +5.04%",
+        "非农就业人数": "前值 +6.0 万人", "失业率": "较上月 -0.1%",
+        "平均时薪": "同比 +3.12%", "初请失业金人数": "较上周 +0.9 万人",
+        "JOLTS 职位空缺": "较上月 +33.3 万个", "GDP 季度增速": "前值 +2.2%",
+        "零售销售": "同比 +6.29%", "2 年期美债收益率": "前值 4.73%",
+        "10 年期美债收益率": "前值 4.98%", "美元指数": "前值 121.51"
+      };
+      function renderAll() {
+        ["inflation", "jobs", "growth"].forEach(function (tab) {
+          document.getElementById("grid-" + tab).innerHTML =
+            CARDS.filter(function (c) { return c.tab === tab; }).map(cardHTML).join("");
+        });
+        document.getElementById("rateGrid").innerHTML = cardHTML(RATE_CARD);
+        document.querySelectorAll(".spark").forEach(function (box) {
+          if (box.closest && box.closest(".sheet")) return;
+          drawChart(box, box.dataset.series, box.dataset.fmt, box.dataset.range.split(","));
+        });
+        CHARTS.forEach(bindChart);
+        document.getElementById("overviewList").innerHTML = CARDS.map(function (c) {
+          var key = metaOf(c);
+          var m = META[key];
+          var st = m ? dynStatus(m) : null;
+          var sub2 = c.series === null ? (c.name.indexOf("制造") >= 0 ? "物价分项 75.2" : "物价分项 73.0") : (SUB2[c.name] || "");
+          if (LIVE_ON && m && m.yoy !== null && m.yoy !== undefined) sub2 = "同比 " + (m.yoy > 0 ? "+" : "") + m.yoy.toFixed(2) + "%";
+          var periodLabel = c.name === "GDP 季度增速" ? "Q3初值" : c.period.replace(" 当周", "");
+          var second = sub2 ? periodLabel + " · " + sub2 : periodLabel;
+          var short = m ? (metaSp(m) + fmtCore(m, m.value) + metaSq(m)) : c.short;
+          var badge;
+          if (st) {
+            var lenCls = st.label.length === 2 ? " b2" : " b3";
+            badge = '<span class="badge ' + st.cls + lenCls + (st.soft ? " soft" : "") + '">' + st.label + "</span>";
+          } else {
+            var badgeLenCls = c.badge[1].length === 2 ? " b2" : " b3";
+            badge = '<span class="badge ' + c.badge[0] + badgeLenCls + (c.badge[0] === "red" && c.badge[1].charAt(0) === "偏" ? " soft" : "") + '">' + c.badge[1] + "</span>";
+          }
+          return '<div class="ov-row" data-goto="' + c.tab + '" data-target="' + cardIdOf(c) + '" role="button" tabindex="0">' +
+            '<span class="on"><span class="on-name">' + c.name + '</span><span class="sub2">' + second + "</span></span>" +
+            '<span class="oval mono">' + short + "</span>" + badge + "</div>";
+        }).join('<div class="list-divider" aria-hidden="true"></div>');
+        bindCalPrev();
+        updateCME();
+        var fu = document.getElementById("dataUpdated");
+        if (fu) fu.textContent = "数据最后更新：" + DATA_UPDATED + (LIVE_ON ? " · 来源 " + (LIVE_SOURCE ? LIVE_SOURCE + " macro_data.json" : "macro_data.json") : " · 内置基准数据（2026-11-15）");
+        if (typeof tick === "function") tick();
+      }
+      renderAll();
+      loadMacroData();
+
+      /* ============ 标签切换 ============ */
+      var VALID_TABS = ["overview", "rate", "inflation", "jobs", "growth", "calendar"];
+      var currentTab = "overview";
+      /* 每个 Tab 独立记忆滚动位置，切换回来精准恢复离开时的位置 */
+      var tabScrollY = { overview: 0, rate: 0, inflation: 0, jobs: 0, growth: 0, calendar: 0 };
+      var navGlider = document.getElementById("navGlider");
+      var glassNav = document.querySelector(".ios-glass-nav");
+      /* 切换 Tab 滚动锁：切换期间 window.scrollTo 触发的 scroll 事件不得把导航栏误缩小；
+         600ms 后（滚动与切换完全稳定）才解锁，并同步 lastScrollY */
+      var isSwitchingTabScroll = false;
+      var navUnlockToken = 0;
+      function lockNavForTabSwitch() {
+        isSwitchingTabScroll = true;
+        /* 切换第一时间强制导航栏放大恢复正常大小 */
+        if (glassNav) glassNav.classList.remove("nav-shrunk");
+        var token = ++navUnlockToken;
+        setTimeout(function () {
+          if (token !== navUnlockToken) return;
+          isSwitchingTabScroll = false;
+          lastScrollY = window.scrollY;
+        }, 600);
+      }
+      function moveGlider(tab) {
+        var idx = VALID_TABS.indexOf(tab);
+        if (navGlider && idx >= 0) navGlider.style.transform = "translate3d(" + (idx * 100) + "%, 0, 0) translateZ(0)";
+      }
+      function activate(tab, restoreScroll) {
+        if (VALID_TABS.indexOf(tab) < 0) tab = "overview";
+        /* 切换触发的第一时间：先上锁并把导航栏强制恢复正常大小，
+           再做任何 window.scrollTo，避免恢复滚动位置时被 scroll 监听误判为上滑而再次缩小 */
+        lockNavForTabSwitch();
+        /* 切换最开头（旧 Tab 隐藏之前）先记录当前 Tab 的滚动高度 */
+        tabScrollY[currentTab] = window.scrollY;
+        /* 重复点击当前 Tab：只回顶部，不重跑切换，避免面板与滑块无谓闪动 */
+        if (tab === currentTab && document.getElementById("panel-" + tab).classList.contains("active")) {
+          tabScrollY[tab] = 0;
+          window.scrollTo(0, 0);
+          lastScrollY = window.scrollY;
+          return;
+        }
+        currentTab = tab;
+        /* 顺序关键：先换面板、写锚点、滚动，最后才启动滑块过渡。
+           若先设 transform 再 scrollTo，滚动会强制浏览器抢先合成一帧，
+           滑块会先在目标位置闪现一下、再重滑一遍（点 Tab 时的闪烁来源）。 */
+        document.querySelectorAll(".tab").forEach(function (b) {
+          b.setAttribute("aria-selected", b.dataset.tab === tab ? "true" : "false");
+        });
+        document.querySelectorAll(".panel").forEach(function (p) {
+          p.classList.toggle("active", p.id === "panel-" + tab);
+        });
+        /* 把当前 Tab 写进 URL 锚点，刷新后可恢复（replaceState 不新增历史记录） */
+        if (window.location.hash !== "#" + tab) {
+          try { history.replaceState(null, "", "#" + tab); }
+          catch (e) { try { window.location.hash = tab; } catch (e2) {} }
+        }
+        /* 同步写入 sessionStorage 兜底：外壳刷新若丢弃锚点，仍能恢复 */
+        try { sessionStorage.setItem("hg-active-tab", tab); } catch (e) {}
+        if (restoreScroll === false) {
+          window.scrollTo(0, 0);
+        } else {
+          /* 目标 Tab 显示后立即恢复到离开它时的滚动位置 */
+          window.scrollTo({ top: tabScrollY[tab] || 0, behavior: "instant" });
+        }
+        lastScrollY = window.scrollY;
+        moveGlider(tab);
+      }
+      document.querySelectorAll(".tab").forEach(function (b) {
+        b.addEventListener("click", function () { activate(b.dataset.tab); });
+      });
+      /* 页面加载时恢复刷新前所在的 Tab：优先 URL 锚点，其次 sessionStorage */
+      (function restoreTab() {
+        var saved = (window.location.hash || "").replace(/^#/, "");
+        if (VALID_TABS.indexOf(saved) < 0) {
+          try { saved = sessionStorage.getItem("hg-active-tab") || ""; } catch (e) { saved = ""; }
+        }
+        if (VALID_TABS.indexOf(saved) >= 0 && saved !== "overview") {
+          /* 刷新恢复时滑块直接就位：临时关掉过渡，避免每次刷新都从「概览」滑过去 */
+          if (navGlider) navGlider.classList.add("no-anim");
+          activate(saved);
+          if (navGlider) {
+            void navGlider.offsetWidth;
+            requestAnimationFrame(function () { navGlider.classList.remove("no-anim"); });
+          }
+        } else if (VALID_TABS.indexOf(saved) >= 0) {
+          currentTab = saved;
+        }
+      })();
+      /* 锚点被外部改动（如浏览器前进/后退）时同步切换 */
+      window.addEventListener("hashchange", function () {
+        var t = (window.location.hash || "").replace(/^#/, "");
+        if (VALID_TABS.indexOf(t) >= 0 && t !== currentTab) activate(t);
+      });
+      /* ============ 底部半屏详情抽屉：点概览行/日历行就地弹出，不切 Tab、不滚动、不高光 ============ */
+      var sheetEl = document.getElementById("sheet");
+      var sheetMask = document.getElementById("sheetMask");
+      var sheetBody = document.getElementById("sheetBody");
+      var sheetOpenState = false;
+      function cardByTarget(id) {
+        for (var i = 0; i < CARDS.length; i++) { if (cardIdOf(CARDS[i]) === id) return CARDS[i]; }
+        if (id === "card-ffr") return RATE_CARD;
+        return null;
+      }
+      function sheetExplain(c, m, st) {
+        var base = c.explain.replace(/ · FRED 无此序列$/, "");
+        if (!m || !st) return base + "。";
+        var now = fmtCore(m, m.value) + metaSq(m);
+        if (m.expected !== null && m.expected !== undefined) {
+          var d = m.value - m.expected;
+          var rel = Math.abs(d) <= m.tol ? "与市场预期基本持平" : (d > 0 ? "高于市场预期" : "低于市场预期");
+          return base + "。本次公布 " + now + "，" + rel + "（预期 " + fmtCore(m, m.expected) + metaSq(m) + "），按预期差定调为「" + st.label + "」。";
+        }
+        return base + "。本次公布 " + now + "，前值 " + fmtCore(m, m.prev) + metaSq(m) + "，暂无市场预期，按与前值的方向定调为「" + st.label + "」。";
+      }
+      function openSheet(id) {
+        var c = cardByTarget(id);
+        if (!c || !sheetEl) return;
+        var key = metaOf(c);
+        var m = META[key];
+        var st = m ? dynStatus(m) : null;
+        var badge = st ? badgeSpan(st) : ('<span class="badge ' + c.badge[0] + '">' + c.badge[1] + "</span>");
+        var html = '<div class="sheet-head"><div class="sheet-title">' + c.name + '<span class="period">' + c.period + "</span></div>" + badge + "</div>";
+        html += '<div class="sheet-big mono">' + (m ? fmtCore(m, m.value) : c.big) + (c.unit ? '<span class="unit">' + c.unit + "</span>" : "") + "</div>";
+        if (m) {
+          html += '<div class="sheet-compare">' +
+            '<div class="sc"><div class="l">预期</div><div class="v mono">' + (m.expected !== null && m.expected !== undefined ? fmtCore(m, m.expected) + metaCp(m) : "暂无预期") + "</div></div>" +
+            '<div class="sc"><div class="l">前值</div><div class="v mono">' + fmtCore(m, m.prev) + metaCp(m) + "</div></div>" +
+            '<div class="sc"><div class="l">同比</div><div class="v mono">' + (m.yoy !== null && m.yoy !== undefined ? (m.yoy > 0 ? "+" : "") + m.yoy.toFixed(2) + "%" : "—") + "</div></div></div>";
+        }
+        if (c.series && SERIES[key]) {
+          html += '<div class="sheet-sec">近 24 个月走势</div>' +
+            '<div class="spark spark-lg" data-series="' + c.series + '" data-fmt="' + c.fmt + '" data-tone="' + (st ? st.cls : c.badge[0]) + '" data-range="' + c.range.join(",") + '">' +
+            '<div class="chart-slot"></div><div class="hover-dot" hidden></div><div class="tip mono" hidden></div></div>';
+          var vals = SERIES[key];
+          var labels = genLabels(c.range, vals.length);
+          var rows = [];
+          for (var i = vals.length - 1; i >= 0 && rows.length < 6; i--) {
+            if (vals[i] === null) continue;
+            rows.push('<div class="sheet-hist-row"><span>' + labels[i] + '</span><span class="hv mono">' + fmtVal(c.fmt, vals[i]) + "</span></div>");
+          }
+          if (rows.length) {
+            html += '<div class="sheet-sec">近 6 期</div>' + rows.join('<div class="list-divider" style="margin:0"></div>');
+          }
+        } else {
+          html += '<div class="no-chart">暂无走势数据（ISM 官方发布，无公开历史序列）</div>';
+        }
+        html += '<p class="sheet-explain">' + sheetExplain(c, m, st) + "</p>";
+        sheetBody.innerHTML = html;
+        sheetBody.scrollTop = 0;
+        var box = sheetBody.querySelector(".spark");
+        if (box) {
+          drawChart(box, box.dataset.series, box.dataset.fmt, box.dataset.range.split(","));
+          bindChart(CHARTS[CHARTS.length - 1]);
+        }
+        sheetMask.hidden = false;
+        sheetEl.hidden = false;
+        void sheetEl.offsetWidth;
+        sheetMask.classList.add("open");
+        sheetEl.classList.add("open");
+        sheetOpenState = true;
+        document.body.style.overflow = "hidden";
+      }
+      function closeSheet() {
+        if (!sheetOpenState) return;
+        sheetOpenState = false;
+        sheetMask.classList.remove("open");
+        sheetEl.classList.remove("open");
+        document.body.style.overflow = "";
+        setTimeout(function () {
+          if (!sheetOpenState) { sheetMask.hidden = true; sheetEl.hidden = true; }
+        }, 400);
+      }
+      if (sheetMask) sheetMask.addEventListener("click", closeSheet);
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
+      /* 抓手下滑关闭 */
+      (function () {
+        var grab = document.getElementById("sheetGrab");
+        if (!grab || !sheetEl) return;
+        var startY = null, dy = 0;
+        grab.addEventListener("touchstart", function (e) {
+          startY = e.touches[0].clientY; dy = 0;
+          sheetEl.style.transition = "none";
+        }, { passive: true });
+        grab.addEventListener("touchmove", function (e) {
+          if (startY === null) return;
+          dy = Math.max(0, e.touches[0].clientY - startY);
+          sheetEl.style.transform = "translateY(" + dy + "px)";
+        }, { passive: true });
+        function end() {
+          if (startY === null) return;
+          startY = null;
+          sheetEl.style.transition = "";
+          sheetEl.style.transform = "";
+          if (dy > 90) closeSheet();
+          dy = 0;
+        }
+        grab.addEventListener("touchend", end);
+        grab.addEventListener("touchcancel", end);
+      })();
+      /* 概览行 / 日历行点击：事件委托统一打开抽屉（页面滚动位置保持不动） */
+      document.addEventListener("click", function (e) {
+        var el = e.target && e.target.closest ? e.target.closest("[data-goto]") : null;
+        if (el) openSheet(el.dataset.target);
+      });
+      document.addEventListener("keydown", function (e) {
+        if ((e.key === "Enter" || e.key === " ") && e.target && e.target.closest && e.target.closest("[data-goto]")) {
+          e.preventDefault();
+          openSheet(e.target.closest("[data-goto]").dataset.target);
+        }
+      });
+
+      /* ============ 顶部导航栏仿 Instagram 动态缩放：上滑缩小、下滑恢复 ============
+         6px 阈值过滤微小抖动；scrollY <= 0 与滚到底部的橡皮筋越界区间不参与判断 */
+      var lastScrollY = window.scrollY;
+      window.addEventListener("scroll", function () {
+        /* 切换 Tab / 跳转卡片期间的程序化滚动不参与缩放判断，只同步基准位置 */
+        if (isSwitchingTabScroll) { lastScrollY = window.scrollY; return; }
+        var y = window.scrollY;
+        if (y <= 0) { lastScrollY = y; return; }
+        var maxY = document.documentElement.scrollHeight - window.innerHeight;
+        if (maxY > 0 && y >= maxY - 1) { lastScrollY = y; return; }
+        if (!glassNav) { lastScrollY = y; return; }
+        if (y <= 40) {
+          glassNav.classList.remove("nav-shrunk");
+        } else if (y > lastScrollY + 6 && y > 56) {
+          glassNav.classList.add("nav-shrunk");
+        } else if (y < lastScrollY - 6) {
+          glassNav.classList.remove("nav-shrunk");
+        }
+        if (y > lastScrollY + 6 || y < lastScrollY - 6 || y <= 40) lastScrollY = y;
+      }, { passive: true });
+
+      /* ============ 深 / 浅色：完全跟随系统，无手动切换 ============ */
+      var schemeMQ = window.matchMedia("(prefers-color-scheme: dark)");
+      function effectiveTheme() {
+        return schemeMQ.matches ? "dark" : "light";
+      }
+      /* 主题根级同步：背景色直接写到 <html>/<body> 根元素 + colorScheme，
+         并动态重建 theme-color 元标签强制 iOS WebView 顶栏与安全区重绘，
+         避免系统切换深浅色后顶部残留上一主题的白块/黑块 */
+      function applyThemeChrome(isDark) {
+        var bg = isDark ? "#1C1C1E" : "#F2F2F7";
+        document.documentElement.style.backgroundColor = bg;
+        if (document.body) document.body.style.backgroundColor = bg;
+        document.documentElement.style.colorScheme = isDark ? "dark" : "light";
+        var old = document.querySelector('meta[name="theme-color"]');
+        if (old) old.parentNode.removeChild(old);
+        var meta = document.createElement("meta");
+        meta.setAttribute("name", "theme-color");
+        meta.setAttribute("content", bg);
+        document.head.appendChild(meta);
+        window.scrollBy(0, 1);
+        window.scrollBy(0, -1);
+      }
+      function syncThemeUI() {
+        var t = effectiveTheme();
+        document.documentElement.setAttribute("data-system-theme", schemeMQ.matches ? "dark" : "light");
+        applyThemeChrome(t === "dark");
+      }
+      syncThemeUI();
+      if (schemeMQ.addEventListener) {
+        schemeMQ.addEventListener("change", syncThemeUI);
+      } else if (schemeMQ.addListener) {
+        schemeMQ.addListener(syncThemeUI);
+      }
+
+      /* ============ 日历「下一场」高亮：最近一场未公布事件行首加 6px 呼吸圆点 ============ */
+      var nextMarkedRow = null;
+      function markNextEvent(now) {
+        var found = null;
+        var cds = document.querySelectorAll(".cal-row .c-cd[data-cd]");
+        for (var i = 0; i < cds.length; i++) {
+          if (new Date(cds[i].dataset.cd).getTime() > now) { found = cds[i].closest(".cal-row"); break; }
+        }
+        if (found === nextMarkedRow) return;
+        if (nextMarkedRow) {
+          var oldDot = nextMarkedRow.querySelector(".next-dot");
+          if (oldDot) oldDot.parentNode.removeChild(oldDot);
+          nextMarkedRow.classList.remove("next-up");
+        }
+        nextMarkedRow = found;
+        if (found) {
+          found.classList.add("next-up");
+          var t = found.querySelector(".c-time");
+          if (t && !t.querySelector(".next-dot")) {
+            var dot = document.createElement("span");
+            dot.className = "next-dot";
+            dot.setAttribute("aria-hidden", "true");
+            t.insertBefore(dot, t.firstChild);
+          }
+        }
+      }
+
+      /* ============ 倒计时（单一定时器，切标签不断） ============ */
+      function pad2(n) { return (n < 10 ? "0" : "") + n; }
+      function tick() {
+        var now = Date.now();
+        document.querySelectorAll("[data-cd]").forEach(function (el) {
+          var target = new Date(el.dataset.cd).getTime();
+          var diff = target - now;
+          var row = el.closest(".cal-row");
+          if (diff <= 0) {
+            el.textContent = "已公布";
+            if (row) row.classList.add("past");
+            return;
+          }
+          var s = Math.floor(diff / 1000);
+          var d = Math.floor(s / 86400); s -= d * 86400;
+          var h = Math.floor(s / 3600); s -= h * 3600;
+          var m = Math.floor(s / 60); s -= m * 60;
+          el.textContent = (d > 0 ? d + "天 " : "") + pad2(h) + ":" + pad2(m) + ":" + pad2(s);
+        });
+        markNextEvent(now);
+      }
+      tick();
+      setInterval(tick, 1000);
+
+      /* ============ 下拉刷新：iOS 三阶段物理回弹 ============
+         阶段一 手指下拉：关 transition，主容器按 0.42 阻尼跟随（上限 88px），指示器渐显放大；
+         阶段二 松手达阈值：弹簧过渡回弹悬停在 52px，转圈加载；
+         阶段三 完成：先原地更新倒计时文本与各卡 SVG 路径（不动 DOM 结构与滚动位置），
+                 再用 iOS 回弹曲线把主容器自动平滑弹回 0，指示器向上收起消失。
+         本页为数据快照，刷新即把现有数据原地重绘一遍，不整页重排。 */
+      var wrapEl = document.querySelector(".wrap");
+      var ptrEl = document.getElementById("ptr");
+      var titleRowEl = document.querySelector(".top-title-row");
+      var stickyNavEl = document.querySelector(".sticky-nav-wrapper");
+      var ptrStartY = null, ptrDist = 0, ptrBusy = false;
+      /* 生成 12 瓣菊花：12 根圆角短线绕中心按 30° 放射，颜色 #8E8E93，无任何底框 */
+      var ptrSvg = document.getElementById("ptrSvg");
+      var ptrPetals = [];
+      (function buildPetals() {
+        if (!ptrSvg) return;
+        var NS = "http://www.w3.org/2000/svg";
+        for (var i = 0; i < 12; i++) {
+          var ln = document.createElementNS(NS, "line");
+          ln.setAttribute("x1", "11"); ln.setAttribute("y1", "2.2");
+          ln.setAttribute("x2", "11"); ln.setAttribute("y2", "6.4");
+          ln.setAttribute("stroke", "#8E8E93");
+          ln.setAttribute("stroke-width", "2");
+          ln.setAttribute("stroke-linecap", "round");
+          ln.setAttribute("transform", "rotate(" + (i * 30) + " 11 11)");
+          ln.style.setProperty("--d", (-0.083 * i).toFixed(3) + "s");
+          ptrSvg.appendChild(ln);
+          ptrPetals.push(ln);
+        }
+      })();
+      function placePtr() { if (ptrEl) ptrEl.style.top = (((titleRowEl ? titleRowEl.offsetHeight : 0) + (stickyNavEl ? stickyNavEl.offsetHeight : 0)) + 10) + "px"; }
+      placePtr();
+      window.addEventListener("resize", placePtr);
+      function ptrShow(dist) {
+        var p = Math.max(0, Math.min(1, dist / 52));
+        ptrEl.style.transition = "none";
+        ptrEl.style.opacity = String(p);
+        ptrEl.style.transform = "translate3d(0, 0, 0) scale(" + (0.6 + 0.4 * p).toFixed(3) + ")";
+        /* 下拉阶段：从 12 点方向顺时针逐根点亮，并随下拉微幅旋转 */
+        var lit = p * 12;
+        for (var i = 0; i < ptrPetals.length; i++) {
+          var f = Math.max(0, Math.min(1, lit - i));
+          ptrPetals[i].style.opacity = (0.15 + 0.7 * f).toFixed(3);
+        }
+        if (ptrSvg) ptrSvg.style.transform = "rotate(" + (p * 40).toFixed(1) + "deg)";
+      }
+      function ptrCleanup() {
+        wrapEl.style.transition = "";
+        /* 非下拉状态下主容器 transform 必须恢复为 none：
+           任何非 none 的 transform 都会破坏内部/后续 sticky 参照系 */
+        wrapEl.style.transform = "none";
+        ptrEl.style.transition = "";
+        ptrEl.style.transform = "";
+        ptrEl.style.opacity = "";
+        ptrEl.classList.remove("spinning");
+        if (ptrSvg) ptrSvg.style.transform = "";
+        for (var i = 0; i < ptrPetals.length; i++) ptrPetals[i].style.opacity = "";
+        ptrBusy = false; ptrDist = 0;
+      }
+      function ptrBounceHome() {
+        /* 阶段三：菊花原地缩小淡出，主容器以弹簧曲线平滑弹回原位 */
+        ptrEl.classList.remove("spinning");
+        wrapEl.style.transition = "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)";
+        wrapEl.style.transform = "translate3d(0, 0, 0)";
+        ptrEl.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+        ptrEl.style.transform = "translate3d(0, 0, 0) scale(0.4)";
+        ptrEl.style.opacity = "0";
+        setTimeout(ptrCleanup, 540);
+      }
+      function ptrRefresh() {
+        ptrBusy = true;
+        /* 阶段二：悬停 52px，菊花切入原生追逐动画（清掉下拉阶段的逐根透明度） */
+        wrapEl.style.transition = "transform 0.32s cubic-bezier(0.32, 0.72, 0, 1)";
+        wrapEl.style.transform = "translate3d(0, 52px, 0)";
+        for (var i = 0; i < ptrPetals.length; i++) ptrPetals[i].style.opacity = "";
+        if (ptrSvg) ptrSvg.style.transform = "";
+        ptrEl.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+        ptrEl.style.opacity = "1";
+        ptrEl.style.transform = "translate3d(0, 0, 0) scale(1)";
+        ptrEl.classList.add("spinning");
+        setTimeout(function () {
+          /* 阶段三第一步：优先拉取 GitHub Raw macro_data.json（CORS 开放、无 Key），失败降级本地缓存/内置基准 */
+          loadMacroData();
+          tick();
+          document.querySelectorAll(".spark").forEach(function (box) {
+            drawChart(box, box.dataset.series, box.dataset.fmt, box.dataset.range.split(","));
+          });
+          /* 阶段三第二步：自动平滑弹回 */
+          ptrBounceHome();
+        }, 900);
+      }
+      document.addEventListener("touchstart", function (e) {
+        if (ptrBusy) return;
+        ptrStartY = (window.scrollY <= 0 && e.touches.length === 1) ? e.touches[0].clientY : null;
+        ptrDist = 0;
+      }, { passive: true });
+      document.addEventListener("touchmove", function (e) {
+        if (ptrBusy || ptrStartY === null) return;
+        if (window.scrollY > 0) { ptrStartY = null; return; }
+        var dy = e.touches[0].clientY - ptrStartY;
+        if (dy <= 0) {
+          if (ptrDist > 0) {
+            ptrDist = 0;
+            wrapEl.style.transition = "none";
+            wrapEl.style.transform = "none";
+            ptrShow(0);
+          }
+          return;
+        }
+        e.preventDefault();
+        /* 阶段一：橡皮筋阻尼拉伸 */
+        ptrDist = Math.min(dy * 0.42, 88);
+        wrapEl.style.transition = "none";
+        wrapEl.style.transform = "translate3d(0, " + ptrDist + "px, 0)";
+        ptrShow(ptrDist);
+      }, { passive: false });
+      function ptrRelease() {
+        if (ptrBusy || ptrStartY === null) return;
+        ptrStartY = null;
+        if (ptrDist >= 52) ptrRefresh();
+        else if (ptrDist > 0) { ptrBusy = true; ptrBounceHome(); }
+      }
+      document.addEventListener("touchend", ptrRelease);
+      document.addEventListener("touchcancel", ptrRelease);
+      /* 回弹动画结束（transitionend）且不在下拉中时，立即把主容器 transform 清为 none，
+         保证 .sticky-nav-wrapper 的 sticky 参照系不被残留 transform 破坏 */
+      wrapEl.addEventListener("transitionend", function (e) {
+        if (e.propertyName === "transform" && ptrDist === 0 && !ptrBusy) {
+          wrapEl.style.transition = "";
+          wrapEl.style.transform = "none";
+        }
+      });
+    </script>
+  </body>
+</html>
