@@ -1,0 +1,37 @@
+{
+  "expectations": {
+    "CPIAUCSL": 0.30,
+    "CPILFESL": 0.20,
+    "PAYEMS": 14.0
+  },
+  "ism": {
+    "manufacturing": {
+      "date": "2026-10",
+      "value": 55.5,
+      "prev": 54.5,
+      "expected": 54.6,
+      "prices_paid": 75.2,
+      "next_release": "2026-12-01 23:00"
+    },
+    "services": {
+      "date": "2026-10",
+      "value": 54.5,
+      "prev": 54.9,
+      "expected": 54.8,
+      "prices_paid": 73.0,
+      "streak_above_50_months": 28,
+      "next_release": "2026-12-03 23:00"
+    }
+  },
+  "cme_fedwatch": {
+    "as_of": "2026-11-14",
+    "meeting_date": "2026-12-10 03:00",
+    "current_range": "3.75%-4.00%",
+    "hike_total_prob": 100.0,
+    "outcomes": [
+      { "label": "加息 25bp (4.00%-4.25%)", "prob": 88.5 },
+      { "label": "加息 50bp (4.25%-4.50%)", "prob": 11.5 },
+      { "label": "维持不变 / 降息", "prob": 0.0 }
+    ]
+  }
+}
