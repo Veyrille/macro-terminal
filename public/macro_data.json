@@ -1,5 +1,5 @@
 {
-  "updated_at_bjt": "2026-11-18 13:10:34",
+  "updated_at_bjt": "2026-11-18 15:08:04",
   "series": {
     "CPIAUCSL": {
       "date": "2026-10-01",
@@ -1871,6 +1871,21 @@
           "prob": 0.0
         }
       ]
+    }
+  },
+  "expectations": {
+    "ICSA": 19.8
+  },
+  "future_expectations": {
+    "ICSA": 19.8
+  },
+  "future_expectation_details": {
+    "ICSA": {
+      "forecast": 19.8,
+      "previous": 20.0,
+      "date": "2026-11-19T08:30:00-05:00",
+      "title": "Unemployment Claims",
+      "impact": "Medium"
     }
   }
 }
