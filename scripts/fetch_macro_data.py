@@ -102,12 +102,8 @@ def parse_ff_number(raw, code: str):
     return round(v, 2)
 
 
-def fetch_forex_factory_expectations() -> tuple[dict, dict]:
-    """抓本周 + 下周日历，只取 country == 'USD' 且标题命中映射表的事件。
-
-    每个指标只保留「未来 15 天内最早一场未公布」的 forecast（已过去的事件预期已过期，
-    不回填）；返回 (future_expectations 数值表, details 明细表)。
-    """
+def fetch_ff_events() -> list[dict]:
+    """抓本周 + 下周 ForexFactory 日历原始事件列表（预期与实值共用同一份抓取）。"""
     events: list[dict] = []
     for url in FF_CALENDAR_URLS:
         try:
@@ -119,7 +115,26 @@ def fetch_forex_factory_expectations() -> tuple[dict, dict]:
                 print(f"[OK] ForexFactory {url.rsplit('/', 1)[-1]} -> {len(payload)} events")
         except Exception as e:
             print(f"[WARN] ForexFactory fetch failed ({url}): {e}")
+    return events
 
+
+def _ff_event_time(ev: dict):
+    """解析 FF 事件时间，失败返回 None。"""
+    try:
+        when = datetime.fromisoformat(str(ev.get("date")))
+        if when.tzinfo is None:
+            when = when.replace(tzinfo=timezone.utc)
+        return when
+    except (TypeError, ValueError):
+        return None
+
+
+def fetch_forex_factory_expectations(events: list[dict]) -> tuple[dict, dict]:
+    """只取 country == 'USD' 且标题命中映射表的事件。
+
+    每个指标只保留「未来 15 天内最早一场未公布」的 forecast（已过去的事件预期已过期，
+    不回填）；返回 (future_expectations 数值表, details 明细表)。
+    """
     now = datetime.now(timezone.utc)
     horizon = now + timedelta(days=15)
     best: dict[str, dict] = {}
@@ -132,11 +147,8 @@ def fetch_forex_factory_expectations() -> tuple[dict, dict]:
         forecast = parse_ff_number(ev.get("forecast"), code)
         if forecast is None:
             continue
-        try:
-            when = datetime.fromisoformat(str(ev.get("date")))
-            if when.tzinfo is None:
-                when = when.replace(tzinfo=timezone.utc)
-        except (TypeError, ValueError):
+        when = _ff_event_time(ev)
+        if when is None:
             continue
         if when < now or when > horizon:
             continue  # 已公布过的旧预期 / 超出两周窗口的远期事件都不写入
@@ -153,6 +165,45 @@ def fetch_forex_factory_expectations() -> tuple[dict, dict]:
     future = {code: item["forecast"] for code, item in best.items()}
     print(f"[OK] ForexFactory future expectations -> {future}")
     return future, best
+
+
+def fetch_forex_factory_actuals(events: list[dict]) -> tuple[dict, dict]:
+    """读取已公布事件的 actual（实际公布值），与 forecast / previous 一并返回。
+
+    只取 country == 'USD'、标题命中映射表、actual 非空且事件时间已到的事件；
+    每个指标只保留最近一场已公布的（FF 本周文件天然只含近期场次）。
+    返回 (actuals 数值表, details 明细表)，details 带该场的 forecast / previous / date，
+    供前端按公布周期匹配日历行并做预期差定调。
+    """
+    now = datetime.now(timezone.utc)
+    best: dict[str, dict] = {}
+    for ev in events:
+        if not isinstance(ev, dict) or ev.get("country") != "USD":
+            continue
+        code = FF_TITLE_MAP.get(str(ev.get("title") or "").strip())
+        if not code:
+            continue
+        actual = parse_ff_number(ev.get("actual"), code)
+        if actual is None:
+            continue
+        when = _ff_event_time(ev)
+        if when is None or when > now:
+            continue  # 尚未到点的事件即使带 actual 占位也不采用
+        item = {
+            "actual": actual,
+            "forecast": parse_ff_number(ev.get("forecast"), code),
+            "previous": parse_ff_number(ev.get("previous"), code),
+            "date": ev.get("date"),
+            "title": ev.get("title"),
+            "impact": ev.get("impact"),
+            "source": "forexfactory",
+        }
+        if code not in best or str(item["date"]) > str(best[code]["date"]):
+            best[code] = item
+
+    actuals = {code: item["actual"] for code, item in best.items()}
+    print(f"[OK] ForexFactory actuals -> {actuals}")
+    return actuals, best
 
 
 def fetch_fred_series(series_id: str, limit: int = 120) -> list[dict]:
@@ -282,6 +333,9 @@ def main():
         "expectations": {},
         "future_expectations": {},
         "future_expectation_details": {},
+        "actuals": {},
+        "actual_details": {},
+        "fred_latest": {},
     }
 
     # 读取可选的手动覆写文件（用于存放 ISM PMI、已公布期市场预期与 CME FedWatch 概率）
@@ -293,13 +347,18 @@ def main():
     # ForexFactory 未来两周预期：自动抓取的最新一致预期同时写入 expectations 与
     # future_expectations（同源同值）；前端把它们只用于「未来一期预期」（日历），
     # 已公布期的 expected 仍由 manual_overrides 提供，两者互不覆盖。
+    # 同一份日历抓取还读取已公布事件的 actual（实际公布值），供日历过点后绑实值。
+    ff_actuals: dict = {}
+    ff_actual_details: dict = {}
     try:
-        ff_future, ff_details = fetch_forex_factory_expectations()
+        ff_events = fetch_ff_events()
+        ff_future, ff_details = fetch_forex_factory_expectations(ff_events)
         output["expectations"] = ff_future
         output["future_expectations"] = ff_future
         output["future_expectation_details"] = ff_details
+        ff_actuals, ff_actual_details = fetch_forex_factory_actuals(ff_events)
     except Exception as e:
-        print(f"[WARN] ForexFactory expectations failed: {e}")
+        print(f"[WARN] ForexFactory expectations/actuals failed: {e}")
 
     for sid, cfg in SERIES_CONFIG.items():
         try:
@@ -307,6 +366,29 @@ def main():
             print(f"[OK] {sid} -> latest={output['series'][sid].get('latest')} ({output['series'][sid].get('date')})")
         except Exception as e:
             print(f"[WARN] {sid} fetch failed: {e}")
+
+    # 已公布实值汇总：FRED 最新一期实值打底（fred_latest + actuals 兜底），
+    # ForexFactory actual 优先覆盖（它是该场公布的官方实值，并带同场 forecast / previous）。
+    # 联邦基金利率上下限是区间口径、不对应单个日历事件，不进实值表。
+    fred_latest = {}
+    for sid, sd in output["series"].items():
+        if sid in ("DFEDTARU", "DFEDTARL"):
+            continue
+        if isinstance(sd, dict) and isinstance(sd.get("latest"), (int, float)):
+            fred_latest[sid] = sd["latest"]
+    output["fred_latest"] = fred_latest
+    merged_actuals = dict(fred_latest)
+    merged_details = {
+        sid: {"actual": v, "forecast": None, "previous": None,
+              "date": output["series"].get(sid, {}).get("date"), "source": "fred"}
+        for sid, v in fred_latest.items()
+    }
+    for code, detail in ff_actual_details.items():
+        merged_actuals[code] = detail["actual"]
+        merged_details[code] = detail
+    output["actuals"] = merged_actuals
+    output["actual_details"] = merged_details
+    print(f"[OK] Actuals merged -> {merged_actuals}")
 
     out_path = os.environ.get("MACRO_OUT_PATH", "macro_data.json")
     with open(out_path, "w", encoding="utf-8") as f:
