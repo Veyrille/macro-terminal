@@ -307,7 +307,7 @@
       .ov-list { background: var(--surface); border-radius: 16px; padding: 6px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; }
       /* 严格整数高度 64px + 整数内边距：每行起始坐标永远落在整数像素上，
          消灭小数行高累加造成的亚像素漂移（分割线忽粗忽细/消失的根源） */
-      .overview-row, .ov-row {
+      .ov-row {
         height: 64px; box-sizing: border-box;
         display: flex; align-items: center; justify-content: space-between; gap: 12px;
         padding: 0 12px; flex-shrink: 0; border-radius: 10px; cursor: pointer; background: transparent;
@@ -364,8 +364,7 @@
       .compare .cl { color: var(--text-tertiary); margin-right: 4px; }
       .compare .cv { color: var(--text-primary); font-weight: 500; overflow-wrap: break-word; }
       .compare .sep { margin: 0 8px; opacity: 0.28; font-weight: 300; flex-shrink: 0; }
-      .spark, .chart-wrapper { position: relative; height: 56px; flex: 0 0 56px; margin: 2px 0 12px 0; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow: visible !important; }
-      .chart-wrapper { overflow: visible !important; }
+      .spark { position: relative; height: 56px; flex: 0 0 56px; margin: 2px 0 12px 0; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow: visible !important; }
       .spark .chart-slot { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
       .spark svg { display: block; width: 100%; max-width: 100%; height: 56px; }
       .spark .tip {
@@ -417,7 +416,6 @@
       .panel-box .pb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; width: 100%; min-width: 0; box-sizing: border-box; }
       .panel-box .pb-head > div { min-width: 0; flex: 1; }
       .panel-box .pb-head .badge { flex-shrink: 0; }
-      .panel-box .pb-explain { font-size: 12.5px; color: var(--ink-2); line-height: 1.6; margin: 10px 0 0; }
       .note-rows p { font-size: 13px; color: var(--ink-2); line-height: 1.65; margin: 0; padding: 9px 0; border-bottom: 1px solid var(--line); }
       .note-rows p:first-child { padding-top: 2px; }
       .note-rows p:last-child { border-bottom: 0; padding-bottom: 2px; }
@@ -447,7 +445,6 @@
         0%   { transform: scale(1);   opacity: 0.75; }
         100% { transform: scale(2.3); opacity: 0; }
       }
-      .cal-head { display: none; }
       /* 日历行：纵向 padding 12px + 整数 line-height 20px，行高为整数像素；
          横向刻意不对称以平衡竖条占位——左 padding 10px + 竖条 3px + 竖条右边距 7px
          = 文字起始距行左缘 20px，右 padding 16px，两侧视觉留白对称，内容不再偏右；
@@ -534,9 +531,6 @@
       .sheet-grab, .sheet-handle-zone { height: 36px; min-height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; flex: 0 0 36px; cursor: grab; touch-action: none; }
       .sheet-handle { width: 36px; height: 5px; border-radius: 3px; background: var(--cal-gray); display: block; }
       .sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 6px 20px calc(24px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; }
-      .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
-      .sheet-title { font-size: 17px; font-weight: 700; min-width: 0; }
-      .sheet-title .period { font-size: 13px; font-weight: 400; color: var(--ink-3); margin-left: 6px; }
       /* 抽屉顶部标题栏：左关闭按钮 + 中居中标题 + 右空占位，三列对称网格，
          中列 1fr 两侧各 56px，标题处于抽屉绝对水平中心；
          状态标签已下移至胶囊切换栏下方的大字行最右侧（见 .sheet-big-row），
@@ -1834,7 +1828,7 @@
         return null;
       }
       function sheetExplain(c, m, st) {
-        var base = c.explain.replace(/ · FRED 无此序列$/, "");
+        var base = c.explain;
         if (!m || !st) return base + "。";
         var now = fmtCore(m, m.value) + metaSq(m);
         /* 定调词组整体包 nowrap span：「利空 / 偏利空 / 利多 / 偏利多 / 中性」连同引号
@@ -1851,7 +1845,7 @@
       /* 模式 B 一句话：讲清指标逻辑 + 上期（T 期）实值与定调作参考 + 本期公布时间与实时倒计时。
          倒计时用 data-cd span 承载，全局 tick() 每秒原地刷新，与日历行同一时钟。 */
       function sheetExplainUpcoming(c, m, st, ev) {
-        var base = c.explain.replace(/ · FRED 无此序列$/, "");
+        var base = c.explain;
         var s = base + "。";
         if (m) {
           s += "上期实值 " + fmtCore(m, m.value) + metaSq(m);
