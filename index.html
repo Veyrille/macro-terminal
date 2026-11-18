@@ -484,7 +484,7 @@
       .chart-ext { position: absolute; left: 2px; font-size: 10px; line-height: 1; color: var(--ink-3); pointer-events: none; z-index: 3; white-space: nowrap; }
       .chart-ext.hi { top: 0; }
       .chart-ext.lo { bottom: 0; }
-      .chart-anchor { position: absolute; right: 2px; font-size: 9px; line-height: 1; color: var(--ink-3); pointer-events: none; z-index: 3; transform: translateY(-130%); white-space: nowrap; }
+      .chart-anchor { position: absolute; right: 0; font-size: 10px; line-height: 1; color: var(--ink-3); font-variant-numeric: tabular-nums; pointer-events: none; z-index: 3; transform: translateY(calc(-100% - 2px)); white-space: nowrap; }
       .spark.spark-lg { height: 120px; flex: 0 0 120px; }
       .spark.spark-lg svg { height: 120px; }
 
@@ -1224,7 +1224,7 @@
         var span = max - min; min -= span * 0.15; max += span * 0.15;
         var W = 300, H = (box.classList && box.classList.contains("spark-lg")) ? 120 : 56, P = 5;
         /* 曲线与最新数据圆点在 x = W-62 处提前结束（PLOT_RIGHT），参考虚线贯穿全宽；
-           锚线数值右对齐贴 SVG 最右边缘（x = W, text-anchor=end），与圆点拉开明显空白，
+           锚线数值由 HTML 浮层右对齐贴图表最右边缘，与圆点拉开明显空白，
            不会被误认为最新圆点的数值，也不会被卡片右边界切掉 */
         var PLOT_RIGHT = W - 62;
         function X(i) { return P + i * (PLOT_RIGHT - P) / (disp.length - 1); }
@@ -1248,13 +1248,15 @@
         svg += '<path d="' + lineD + '" fill="none" style="stroke:var(--chart)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>';
         svg += '<circle cx="' + X(lastI).toFixed(1) + '" cy="' + Y(disp[lastI]).toFixed(1) + '" r="7" style="fill:' + toneVar + '" opacity="0.22"/>';
         svg += '<circle cx="' + X(lastI).toFixed(1) + '" cy="' + Y(disp[lastI]).toFixed(1) + '" r="3.5" style="fill:' + toneVar + '"/>';
-        svg += '<text x="' + W + '" y="' + Math.max(10, anchorY - 4).toFixed(1) + '" text-anchor="end" font-size="10" style="fill:var(--ink-3);font-variant-numeric:tabular-nums">' + anchorText + "</text>";
+        /* 锚线数值不放进 SVG：SVG 带 preserveAspectRatio="none" 被拉到容器全宽，
+           横向缩放≠纵向缩放会把 <text> 字形压扁；改由下方 HTML 浮层 .chart-anchor 渲染 */
         svg += "</svg>";
         box.querySelector(".chart-slot").innerHTML = svg;
         box.querySelectorAll(".chart-ext, .chart-anchor").forEach(function (n) { n.parentNode.removeChild(n); });
         var ovBox = document.createElement("div");
         ovBox.innerHTML = '<span class="chart-ext hi">最高 ' + fmtVal(fmt, max0) + '</span>' +
-          '<span class="chart-ext lo">最低 ' + fmtVal(fmt, min0) + '</span>';
+          '<span class="chart-ext lo">最低 ' + fmtVal(fmt, min0) + '</span>' +
+          '<span class="chart-anchor" style="top:' + (Math.max(12, anchorY) / H * 100).toFixed(2) + '%">' + anchorText + "</span>";
         while (ovBox.firstChild) box.appendChild(ovBox.firstChild);
         for (var ci = CHARTS.length - 1; ci >= 0; ci--) { if (CHARTS[ci].el === box) CHARTS.splice(ci, 1); }
         CHARTS.push({ el: box, vals: vals, fmt: fmt, labels: genLabels(range, vals.length),
