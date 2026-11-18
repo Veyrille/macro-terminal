@@ -484,16 +484,17 @@
       .sheet-mask.open { opacity: 1; }
       .sheet {
         position: fixed; left: 0; right: 0; bottom: 0; z-index: 201;
-        max-width: 720px; margin: 0 auto; height: 62vh;
+        max-width: 720px; margin: 0 auto; height: 62vh; height: 62dvh;
         background: var(--surface); border-radius: 20px 20px 0 0;
         box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
-        transform: translateY(103%); transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+        transform: translateY(103%); transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), height 0.36s cubic-bezier(0.32, 0.72, 0, 1);
         display: flex; flex-direction: column; overflow: hidden;
       }
       .sheet.open { transform: translateY(0); }
-      .sheet-grab { padding: 10px 0 4px; display: flex; justify-content: center; flex: 0 0 auto; cursor: grab; touch-action: none; }
+      .sheet.expanded { height: 88vh; height: 88dvh; }
+      .sheet-grab, .sheet-handle-zone { height: 36px; min-height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; flex: 0 0 36px; cursor: grab; touch-action: none; }
       .sheet-handle { width: 36px; height: 5px; border-radius: 3px; background: var(--cal-gray); display: block; }
-      .sheet-body { overflow-y: auto; padding: 6px 20px calc(24px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; }
+      .sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 6px 20px calc(24px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; }
       .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
       .sheet-title { font-size: 17px; font-weight: 700; min-width: 0; }
       .sheet-title .period { font-size: 13px; font-weight: 400; color: var(--ink-3); margin-left: 6px; }
@@ -673,11 +674,11 @@
         <div class="cal-table">
           <div class="cal-row" data-goto="jobs" data-target="card-jolts" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-01 23:00<span class="wk">周二</span></span><span class="c-cd mono" data-cd="2026-12-01T23:00:00+08:00">—</span></div><span class="c-ev">JOLTS 职位空缺（10 月）</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">752.3万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
-          <div class="cal-row" data-goto="growth" data-target="card-ism-mfg" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-01 23:00<span class="wk">周二</span></span><span class="c-cd mono" data-cd="2026-12-01T23:00:00+08:00">—</span></div><span class="c-ev">ISM 制造业 PMI（11 月）<span class="note">每月第一个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">55.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">54.6</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="cal-row" data-goto="growth" data-target="card-ism-mfg" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-01 23:00<span class="wk">周二</span></span><span class="c-cd mono" data-cd="2026-12-01T23:00:00+08:00">—</span></div><span class="c-ev">ISM 制造业 PMI（11 月）<span class="note">每月第一个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">55.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
           <div class="cal-row" data-goto="jobs" data-target="card-icsa" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-03 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-03T21:30:00+08:00">—</span></div><span class="c-ev">初请失业金人数</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">20.0万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
-          <div class="cal-row" data-goto="growth" data-target="card-ism-svc" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-03 23:00<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-03T23:00:00+08:00">—</span></div><span class="c-ev">ISM 服务业 PMI（11 月）<span class="note">每月第三个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">54.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">54.8</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="cal-row" data-goto="growth" data-target="card-ism-svc" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-03 23:00<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-03T23:00:00+08:00">—</span></div><span class="c-ev">ISM 服务业 PMI（11 月）<span class="note">每月第三个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">54.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
           <div class="cal-row imp-high" data-goto="jobs" data-target="card-payems" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-04 21:30<span class="wk">周五</span></span><span class="c-cd mono" data-cd="2026-12-04T21:30:00+08:00">—</span></div><span class="c-ev">非农就业 + 失业率 + 平均时薪（11 月）</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+16.5万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
@@ -685,7 +686,7 @@
           <div class="list-divider" aria-hidden="true"></div>
           <div class="cal-row"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-10 03:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-10T03:30:00+08:00">—</span></div><span class="c-ev">美联储主席新闻发布会<span class="note">措辞比决议本身更能影响市场</span></span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
-          <div class="cal-row imp-high" data-goto="inflation" data-target="card-cpiaucsl" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-10 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-10T21:30:00+08:00">—</span></div><span class="c-ev">CPI 通胀（11 月）<span class="note">注意：这次 CPI 在议息会议之后才公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+0.35%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">+0.30%</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="cal-row imp-high" data-goto="inflation" data-target="card-cpiaucsl" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-10 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-10T21:30:00+08:00">—</span></div><span class="c-ev">CPI 通胀（11 月）<span class="note">注意：这次 CPI 在议息会议之后才公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+0.35%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
           <div class="cal-row" data-goto="jobs" data-target="card-icsa" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">12-10 21:30<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2026-12-10T21:30:00+08:00">—</span></div><span class="c-ev">初请失业金人数</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">20.0万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
@@ -711,7 +712,7 @@
           <div class="list-divider" aria-hidden="true"></div>
           <div class="cal-row imp-high" data-goto="jobs" data-target="card-payems" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">01-08 21:30<span class="wk">周五</span></span><span class="c-cd mono" data-cd="2027-01-08T21:30:00+08:00">—</span></div><span class="c-ev">非农就业 + 失业率（12 月）</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+16.5万</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
-          <div class="cal-row imp-high" data-goto="inflation" data-target="card-cpiaucsl" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">01-13 21:30<span class="wk">周三</span></span><span class="c-cd mono" data-cd="2027-01-13T21:30:00+08:00">—</span></div><span class="c-ev">CPI 通胀（12 月）</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+0.35%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">+0.30%</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="cal-row imp-high" data-goto="inflation" data-target="card-cpiaucsl" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">01-13 21:30<span class="wk">周三</span></span><span class="c-cd mono" data-cd="2027-01-13T21:30:00+08:00">—</span></div><span class="c-ev">CPI 通胀（12 月）</span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">+0.35%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
           <div class="cal-row"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">01-14 03:00<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2027-01-14T03:00:00+08:00">—</span></div><span class="c-ev">美联储褐皮书</span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
@@ -719,9 +720,9 @@
           <div class="list-divider" aria-hidden="true"></div>
           <div class="cal-row imp-core" data-goto="rate" data-target="card-ffr" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">01-28 03:00<span class="wk">周四</span></span><span class="c-cd mono" data-cd="2027-01-28T03:00:00+08:00">—</span></div><span class="c-ev">FOMC 利率决议<span class="note">2027 年第一次议息会议</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">3.75%-4.00%</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
-          <div class="cal-row" data-goto="growth" data-target="card-ism-mfg" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">1 月首个工作日 23:00</span><span class="c-cd dim">日期未定</span></div><span class="c-ev">ISM 制造业 PMI（12 月）<span class="note">按 ISM 惯例：每月第一个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">55.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">54.6</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="cal-row" data-goto="growth" data-target="card-ism-mfg" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">1 月首个工作日 23:00</span><span class="c-cd dim">日期未定</span></div><span class="c-ev">ISM 制造业 PMI（12 月）<span class="note">按 ISM 惯例：每月第一个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">55.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
           <div class="list-divider" aria-hidden="true"></div>
-          <div class="cal-row" data-goto="growth" data-target="card-ism-svc" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">1 月第三个工作日 23:00</span><span class="c-cd dim">日期未定</span></div><span class="c-ev">ISM 服务业 PMI（12 月）<span class="note">按 ISM 惯例：每月第三个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">54.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">54.8</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
+          <div class="cal-row" data-goto="growth" data-target="card-ism-svc" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">1 月第三个工作日 23:00</span><span class="c-cd dim">日期未定</span></div><span class="c-ev">ISM 服务业 PMI（12 月）<span class="note">按 ISM 惯例：每月第三个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">54.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">待公布</span></span></span></div></div>
         </div>
         <p class="foot-note">美元指数为广义贸易加权美元指数，与 ICE 美元指数（DXY）口径不同。</p>
       </section>
@@ -730,7 +731,7 @@
     </div>
     <div class="sheet-mask" id="sheetMask" hidden></div>
     <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="指标详情" hidden>
-      <div class="sheet-grab" id="sheetGrab"><span class="sheet-handle"></span></div>
+      <div class="sheet-grab sheet-handle-zone" id="sheetGrab"><span class="sheet-handle"></span></div>
       <div class="sheet-body" id="sheetBody"></div>
     </div>
     <script>
@@ -904,6 +905,9 @@
         usd:     { value: 121.88, prev: 121.51, expected: null, yoy: null, kind: "hot", tol: 0.5, disp: "num2" },
         ffr:     { value: 4.00, prev: 3.75, expected: null, yoy: null, kind: "hot", tol: 0.01, disp: "range" }
       };
+      /* 未来一期专用预期：与已公布期的 expected 严格分离。日历只读 futureExpected，
+         未到公布前无未来预期时为 null，日历统一显示 --，绝不回填历史预期。 */
+      Object.keys(META).forEach(function (k) { if (META[k].futureExpected === undefined) META[k].futureExpected = null; });
       function metaOf(c) {
         if (c.series) return c.series;
         return c.name.indexOf("制造") >= 0 ? "ism-mfg" : "ism-svc";
@@ -1098,14 +1102,17 @@
         var min = min0, max = max0;
         if (min === max) { min -= 1; max += 1; }
         var span = max - min; min -= span * 0.15; max += span * 0.15;
-        var W = 300, H = 56, P = 5;
-        function X(i) { return P + i * (W - 2 * P) / (disp.length - 1); }
+        var W = 300, H = (box.classList && box.classList.contains("spark-lg")) ? 120 : 56, P = 5;
+        /* 右侧预留 58px 空白文字区：曲线只画到 x = W-58，参考虚线贯穿全宽，
+           「0.2% 基准 / 均值」文字固定在 x = W-52，与最新红点永不重叠 */
+        var PLOT_RIGHT = W - 58;
+        function X(i) { return P + i * (PLOT_RIGHT - P) / (disp.length - 1); }
         function Y(v) { return H - P - (v - min) / (max - min) * (H - 2 * P); }
         var pts = disp.map(function (v, i) { return [X(i), Y(v)]; });
         var lastI = disp.length - 1;
         var INF_ANCHOR = { cpi: 1, corecpi: 1, pce: 1, corepce: 1, ppi: 1, coreppi: 1 };
         var anchorV = INF_ANCHOR[key] ? 0.2 : mean;
-        var anchorText = INF_ANCHOR[key] ? "0.2% 基准" : "均值 " + fmtVal(fmt, mean);
+        var anchorText = INF_ANCHOR[key] ? "0.2% 基准" : "均值";
         var anchorY = Math.max(2, Math.min(H - 2, Y(anchorV)));
         var tone = box.dataset.tone || "";
         var toneVar = tone === "red" ? "var(--red)" : tone === "green" ? "var(--green)" : tone === "amber" ? "var(--amber)" : "var(--chart)";
@@ -1120,13 +1127,13 @@
         svg += '<path d="' + lineD + '" fill="none" style="stroke:var(--chart)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>';
         svg += '<circle cx="' + X(lastI).toFixed(1) + '" cy="' + Y(disp[lastI]).toFixed(1) + '" r="7" style="fill:' + toneVar + '" opacity="0.22"/>';
         svg += '<circle cx="' + X(lastI).toFixed(1) + '" cy="' + Y(disp[lastI]).toFixed(1) + '" r="3.5" style="fill:' + toneVar + '"/>';
+        svg += '<text x="' + (W - 52) + '" y="' + Math.max(10, anchorY - 4).toFixed(1) + '" text-anchor="start" font-size="10" style="fill:var(--ink-3)">' + anchorText + "</text>";
         svg += "</svg>";
         box.querySelector(".chart-slot").innerHTML = svg;
         box.querySelectorAll(".chart-ext, .chart-anchor").forEach(function (n) { n.parentNode.removeChild(n); });
         var ovBox = document.createElement("div");
         ovBox.innerHTML = '<span class="chart-ext hi">最高 ' + fmtVal(fmt, max0) + '</span>' +
-          '<span class="chart-ext lo">最低 ' + fmtVal(fmt, min0) + '</span>' +
-          '<span class="chart-anchor" style="top:' + (anchorY / H * 100).toFixed(1) + '%">' + anchorText + "</span>";
+          '<span class="chart-ext lo">最低 ' + fmtVal(fmt, min0) + '</span>';
         while (ovBox.firstChild) box.appendChild(ovBox.firstChild);
         for (var ci = CHARTS.length - 1; ci >= 0; ci--) { if (CHARTS[ci].el === box) CHARTS.splice(ci, 1); }
         CHARTS.push({ el: box, vals: vals, fmt: fmt, labels: genLabels(range, vals.length),
@@ -1155,11 +1162,18 @@
         var tone = st ? st.cls : c.badge[0];
         var bigText = m ? fmtCore(m, m.value) : c.big;
         var parts = c.compare;
-        if (LIVE_ON && m && c.series && key !== "ffr") {
+        /* 单一数据源：卡片与抽屉 100% 共用 META(=INDICATORS) 同一对象渲染预期/前值/同比，
+           不再各用一套写死数字；有 series 的卡片一律由 META 重建对比行（与 LIVE 与否无关） */
+        if (m && key !== "ffr") {
           parts = [];
           if (m.expected !== null && m.expected !== undefined) parts.push(["预期", fmtCore(m, m.expected) + metaCp(m)]);
           if (m.prev !== null && m.prev !== undefined) parts.push(["前值", fmtCore(m, m.prev) + metaCp(m)]);
           if (m.yoy !== null && m.yoy !== undefined) parts.push(["同比", (m.yoy > 0 ? "+" : "") + m.yoy.toFixed(2) + "%"]);
+          /* ISM 物价分项为卡片独有补充信息（非预期/前值口径），保留在对比行末尾 */
+          c.compare.forEach(function (p) { if (p[0] === "物价分项") parts.push(p); });
+          /* 工资环比为派生补充（时薪水平同比已在 META），保留原对比行中的环比项 */
+          c.compare.forEach(function (p) { if (p[0] === "环比" && key === "wage") parts.splice(0, 0, p); });
+          if (!parts.length) parts = c.compare;
         }
         var compare = parts.map(function (p, i) {
           return (i ? '<span class="sep">|</span>' : "") + '<span class="cl">' + p[0] + '</span><span class="cv mono">' + p[1] + "</span>";
@@ -1241,10 +1255,17 @@
           var key = REV_IDS[row.dataset.target];
           var m = key ? META[key] : null;
           if (!m) return;
-          var vv = row.querySelector(".cal-vals .cal-vv");
-          if (!vv) return;
-          if (key === "ffr") vv.textContent = (m.value - 0.25).toFixed(2) + "%-" + m.value.toFixed(2) + "%";
-          else vv.textContent = fmtCore(m, m.value) + (m.cal || "");
+          var vvs = row.querySelectorAll(".cal-vals .cal-vv");
+          if (!vvs.length) return;
+          /* 前值（未来待公布一期的上一期）= 最新已公布实值 INDICATORS[id].latest */
+          if (key === "ffr") vvs[0].textContent = (m.value - 0.25).toFixed(2) + "%-" + m.value.toFixed(2) + "%";
+          else vvs[0].textContent = fmtCore(m, m.value) + (m.cal || "");
+          /* 预期只读未来一期专用字段 futureExpected；无未来预期统一 --，
+             绝不把已公布期的历史 expected 错填到未来日历上 */
+          if (vvs[1]) {
+            vvs[1].textContent = (m.futureExpected !== null && m.futureExpected !== undefined)
+              ? fmtCore(m, m.futureExpected) + (m.cal || "") : "--";
+          }
         });
       }
 
@@ -1398,6 +1419,10 @@
       var sheetMask = document.getElementById("sheetMask");
       var sheetBody = document.getElementById("sheetBody");
       var sheetOpenState = false;
+      var isSheetOpen = false;
+      var sheetExpanded = false;
+      /* openBottomSheet 为 openSheet 的别名（统一命名）：打开抽屉的唯一入口 */
+      function openBottomSheet(id) { openSheet(id); }
       function cardByTarget(id) {
         for (var i = 0; i < CARDS.length; i++) { if (cardIdOf(CARDS[i]) === id) return CARDS[i]; }
         if (id === "card-ffr") return RATE_CARD;
@@ -1447,8 +1472,14 @@
           html += '<div class="no-chart">暂无走势数据（ISM 官方发布，无公开历史序列）</div>';
         }
         html += '<p class="sheet-explain">' + sheetExplain(c, m, st) + "</p>";
+        /* 每次打开默认重置为 62dvh 半屏态 */
+        sheetExpanded = false;
+        sheetEl.classList.remove("expanded");
+        sheetEl.style.height = "";
+        sheetEl.style.transform = "";
         sheetBody.innerHTML = html;
         sheetBody.scrollTop = 0;
+        requestAnimationFrame(function () { sheetBody.scrollTop = 0; });
         var box = sheetBody.querySelector(".spark");
         if (box) {
           drawChart(box, box.dataset.series, box.dataset.fmt, box.dataset.range.split(","));
@@ -1460,11 +1491,15 @@
         sheetMask.classList.add("open");
         sheetEl.classList.add("open");
         sheetOpenState = true;
+        isSheetOpen = true;
         document.body.style.overflow = "hidden";
       }
       function closeSheet() {
         if (!sheetOpenState) return;
         sheetOpenState = false;
+        isSheetOpen = false;
+        sheetExpanded = false;
+        sheetEl.classList.remove("expanded");
         sheetMask.classList.remove("open");
         sheetEl.classList.remove("open");
         document.body.style.overflow = "";
@@ -1474,7 +1509,9 @@
       }
       if (sheetMask) sheetMask.addEventListener("click", closeSheet);
       document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
-      /* 抓手下滑关闭 */
+      /* 小灰条两段式手势（.sheet-handle-zone 36px 热区，touch-action:none）：
+         62dvh 半屏态上拉 >40px → 88dvh 大屏态；88dvh 下拉 >45px → 收回 62dvh；
+         62dvh 继续下拉 >55px → 关闭。高度切换走 CSS height 0.36s 弹性过渡。 */
       (function () {
         var grab = document.getElementById("sheetGrab");
         if (!grab || !sheetEl) return;
@@ -1485,16 +1522,27 @@
         }, { passive: true });
         grab.addEventListener("touchmove", function (e) {
           if (startY === null) return;
-          dy = Math.max(0, e.touches[0].clientY - startY);
-          sheetEl.style.transform = "translateY(" + dy + "px)";
+          dy = e.touches[0].clientY - startY;
+          /* 仅半屏态向下拖时跟手位移预览关闭，其余方向靠松手吸附切档 */
+          if (!sheetExpanded && dy > 0) sheetEl.style.transform = "translateY(" + dy + "px)";
+          else sheetEl.style.transform = "";
         }, { passive: true });
         function end() {
           if (startY === null) return;
-          startY = null;
+          var d = dy;
+          startY = null; dy = 0;
           sheetEl.style.transition = "";
           sheetEl.style.transform = "";
-          if (dy > 90) closeSheet();
-          dy = 0;
+          void sheetEl.offsetWidth;
+          if (!sheetExpanded && d < -40) {
+            sheetExpanded = true;
+            sheetEl.classList.add("expanded");
+          } else if (sheetExpanded && d > 45) {
+            sheetExpanded = false;
+            sheetEl.classList.remove("expanded");
+          } else if (!sheetExpanded && d > 55) {
+            closeSheet();
+          }
         }
         grab.addEventListener("touchend", end);
         grab.addEventListener("touchcancel", end);
@@ -1708,12 +1756,20 @@
           ptrBounceHome();
         }, 900);
       }
+      /* 抽屉手势隔离：抽屉打开或触摸点在抽屉/遮罩内时，下拉刷新一律拦截并清零 */
+      function ptrBlockedBySheet(e) {
+        if (typeof isSheetOpen !== "undefined" && isSheetOpen === true) return true;
+        if (typeof sheetOpenState !== "undefined" && sheetOpenState === true) return true;
+        return !!(e && e.target && e.target.closest && e.target.closest(".sheet, .sheet-mask, .bottom-sheet, .sheet-overlay"));
+      }
       document.addEventListener("touchstart", function (e) {
+        if (ptrBlockedBySheet(e)) { ptrStartY = null; ptrDist = 0; return; }
         if (ptrBusy) return;
         ptrStartY = (window.scrollY <= 0 && e.touches.length === 1) ? e.touches[0].clientY : null;
         ptrDist = 0;
       }, { passive: true });
       document.addEventListener("touchmove", function (e) {
+        if (ptrBlockedBySheet(e)) { ptrStartY = null; ptrDist = 0; return; }
         if (ptrBusy || ptrStartY === null) return;
         if (window.scrollY > 0) { ptrStartY = null; return; }
         var dy = e.touches[0].clientY - ptrStartY;
@@ -1733,7 +1789,8 @@
         wrapEl.style.transform = "translate3d(0, " + ptrDist + "px, 0)";
         ptrShow(ptrDist);
       }, { passive: false });
-      function ptrRelease() {
+      function ptrRelease(e) {
+        if (ptrBlockedBySheet(e)) { ptrStartY = null; ptrDist = 0; return; }
         if (ptrBusy || ptrStartY === null) return;
         ptrStartY = null;
         if (ptrDist >= 52) ptrRefresh();
