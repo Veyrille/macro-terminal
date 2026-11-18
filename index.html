@@ -432,13 +432,18 @@
          上下左右四边 100% 正圆完整；SVG 本体带 overflow: visible，波纹不被自身视口裁切 */
       .next-pulse-svg { display: block; flex-shrink: 0; }
       .cal-head { display: none; }
-      /* 日历行与「最新数据一览」同款：整数 padding 12px + 整数 line-height 20px，
-         行高为整数像素；分割线同样用文档流实体 .list-divider 节点（见概览区定义） */
+      /* 日历行：纵向 padding 12px + 整数 line-height 20px，行高为整数像素；
+         横向刻意不对称以平衡竖条占位——左 padding 10px + 竖条 3px + 竖条右边距 7px
+         = 文字起始距行左缘 20px，右 padding 16px，两侧视觉留白对称，内容不再偏右；
+         分割线同样用文档流实体 .list-divider 节点（见概览区定义） */
       .cal-row {
         display: flex; align-items: stretch; overflow: visible;
-        padding: 12px; border-radius: 10px; background: transparent; line-height: 20px;
+        padding: 12px 16px 12px 10px; border-radius: 10px; background: transparent; line-height: 20px;
         transition: background-color 0.15s ease, opacity 0.18s ease;
       }
+      /* 日历内分割线两端与行内容对齐：左端对齐竖条左缘（左 margin 10px），
+         右端对齐文字右缘（右 margin 16px），与 .cal-row 的横向 padding 一致 */
+      .cal-table .list-divider { margin: 0 16px 0 10px; }
       .cal-row[data-goto] { cursor: pointer; }
       @media (hover: hover) and (pointer: fine) {
         .cal-row[data-goto]:hover { background: var(--surface-2); }
@@ -448,7 +453,7 @@
         .cal-row[data-goto]:active { background-color: rgba(120, 120, 128, 0.24); }
       }
       /* 左侧重要度竖条：核心红 / 重要橙 / 常规灰，无文字标签 */
-      .cal-bar { width: 3px; border-radius: 2px; align-self: stretch; flex-shrink: 0; margin-right: 12px; background: var(--cal-gray); }
+      .cal-bar { width: 3px; border-radius: 2px; align-self: stretch; flex-shrink: 0; margin-right: 7px; background: var(--cal-gray); }
       .cal-row.imp-core .cal-bar { background: var(--red); }
       .cal-row.imp-high .cal-bar { background: var(--amber); }
       .cal-row.past { opacity: .5; }
@@ -462,8 +467,11 @@
       .c-ev .note { display: block; color: var(--ink-2); font-size: 12px; font-weight: 400; margin-top: 1px; }
       .cal-vals { font-size: 12px; font-variant-numeric: tabular-nums; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 5px; line-height: 20px; width: 100%; box-sizing: border-box; }
       .cal-vals > span { min-width: 0; white-space: nowrap; }
+      /* 三列对齐：前值左对齐；预期改左对齐 + 固定 padding-left 12px（不再居中，
+         否则「预期 19.8万」与「预期 --」长度不同时「预期」二字起始位置左右乱跳、
+         上下行对不齐）；公布右对齐贴紧右缘。三列文字起始/结束落在同一条垂直线上 */
       .cal-vals > span:nth-child(1) { text-align: left; justify-self: start; }
-      .cal-vals > span:nth-child(2) { text-align: center; justify-self: center; }
+      .cal-vals > span:nth-child(2) { text-align: left; justify-self: stretch; padding-left: 12px; }
       .cal-vals > span:nth-child(3) { text-align: right; justify-self: end; }
       .cal-vl { color: #8E8E93; }
       .cal-vv { color: var(--ink); font-weight: 500; white-space: nowrap; }
