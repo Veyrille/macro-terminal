@@ -427,33 +427,10 @@
       }
       .cal-month-label:first-child { margin-top: 2px; }
       /* 「下一场」呼吸圆点：标在最近一场未公布事件的行首。
-         16px 自包含安全容器：中心点 6px，呼吸环最大扩散 6px × 2.3 = 13.8px，
-         严格小于 16px 容器本身，光圈数学上绝不越界，无论外层如何裁切都完整圆润；
-         不再使用会向外溢出的 box-shadow / ::after 大光晕方案 */
-      .next-pulse-wrap {
-        position: relative;
-        width: 16px; height: 16px;
-        display: inline-flex; align-items: center; justify-content: center;
-        flex-shrink: 0; margin-right: 4px; vertical-align: middle;
-      }
-      /* 中心实心蓝点 */
-      .next-pulse-core {
-        width: 6px; height: 6px; border-radius: 50%;
-        background-color: #007AFF;
-        position: relative; z-index: 2;
-      }
-      /* 外圈呼吸波纹：绝对居中于容器，最大只扩散到 13.8px < 16px */
-      .next-pulse-ring {
-        position: absolute; left: 50%; top: 50%;
-        width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%;
-        background-color: rgba(0, 122, 255, 0.45);
-        z-index: 1; pointer-events: none;
-        animation: pulseContained 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-      }
-      @keyframes pulseContained {
-        0%   { transform: scale(1);   opacity: 0.75; }
-        100% { transform: scale(2.3); opacity: 0; }
-      }
+         16×16 纯 SVG 绘制（中心圆 + SMIL 扩散环，见 markNextEvent），
+         不再用 div/span + CSS 圆：SVG 几何不受行内盒基线裁剪与 Flex 纵向挤压影响，
+         上下左右四边 100% 正圆完整；SVG 本体带 overflow: visible，波纹不被自身视口裁切 */
+      .next-pulse-svg { display: block; flex-shrink: 0; }
       .cal-head { display: none; }
       /* 日历行与「最新数据一览」同款：整数 padding 12px + 整数 line-height 20px，
          行高为整数像素；分割线同样用文档流实体 .list-divider 节点（见概览区定义） */
@@ -477,7 +454,9 @@
       .cal-row.past { opacity: .5; }
       .cal-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; overflow: visible; }
       .cal-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; overflow: visible; }
-      .c-time { font-size: 13px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; overflow: visible; }
+      /* 日期行：Flex 垂直居中与 SVG 圆点同行，禁止 inline-block / vertical-align 混排，
+         本行及父级链（.cal-top / .cal-main / .cal-row / .cal-table）一律 overflow: visible */
+      .c-time { font-size: 13px; font-weight: 600; white-space: nowrap; display: flex; align-items: center; overflow: visible; line-height: 1.4; }
       .c-time .wk { color: var(--ink-3); font-weight: 400; font-size: 12px; margin-left: 4px; }
       .c-ev { font-size: 13.5px; font-weight: 600; min-width: 0; margin-top: 2px; overflow-wrap: break-word; }
       .c-ev .note { display: block; color: var(--ink-2); font-size: 12px; font-weight: 400; margin-top: 1px; }
@@ -2093,25 +2072,50 @@
         }
         if (found === nextMarkedRow) return;
         if (nextMarkedRow) {
-          var oldWrap = nextMarkedRow.querySelector(".next-pulse-wrap");
-          if (oldWrap) oldWrap.parentNode.removeChild(oldWrap);
+          var oldSvg = nextMarkedRow.querySelector(".next-pulse-svg");
+          if (oldSvg) oldSvg.parentNode.removeChild(oldSvg);
           nextMarkedRow.classList.remove("next-up");
         }
         nextMarkedRow = found;
         if (found) {
           found.classList.add("next-up");
           var t = found.querySelector(".c-time");
-          if (t && !t.querySelector(".next-pulse-wrap")) {
-            var wrap = document.createElement("span");
-            wrap.className = "next-pulse-wrap";
-            wrap.setAttribute("aria-hidden", "true");
-            var ring = document.createElement("span");
-            ring.className = "next-pulse-ring";
-            var core = document.createElement("span");
-            core.className = "next-pulse-core";
-            wrap.appendChild(ring);
-            wrap.appendChild(core);
-            t.insertBefore(wrap, t.firstChild);
+          if (t && !t.querySelector(".next-pulse-svg")) {
+            /* 16×16 纯 SVG 呼吸点：外圈 SMIL 扩散环（r 3→7、透明度 0.8→0，1.8s 循环）
+               + 中心实心圆 r=3 #007AFF；SVG 几何不被 CSS 盒模型压扁或裁底边 */
+            var SVGNS = "http://www.w3.org/2000/svg";
+            var svg = document.createElementNS(SVGNS, "svg");
+            svg.setAttribute("width", "16");
+            svg.setAttribute("height", "16");
+            svg.setAttribute("viewBox", "0 0 16 16");
+            svg.setAttribute("class", "next-pulse-svg");
+            svg.setAttribute("style", "display:block; flex-shrink:0; margin-right:4px; overflow:visible;");
+            svg.setAttribute("aria-hidden", "true");
+            var ring = document.createElementNS(SVGNS, "circle");
+            ring.setAttribute("cx", "8");
+            ring.setAttribute("cy", "8");
+            ring.setAttribute("r", "3");
+            ring.setAttribute("fill", "rgba(0, 122, 255, 0.45)");
+            var animR = document.createElementNS(SVGNS, "animate");
+            animR.setAttribute("attributeName", "r");
+            animR.setAttribute("values", "3;7");
+            animR.setAttribute("dur", "1.8s");
+            animR.setAttribute("repeatCount", "indefinite");
+            var animO = document.createElementNS(SVGNS, "animate");
+            animO.setAttribute("attributeName", "opacity");
+            animO.setAttribute("values", "0.8;0");
+            animO.setAttribute("dur", "1.8s");
+            animO.setAttribute("repeatCount", "indefinite");
+            ring.appendChild(animR);
+            ring.appendChild(animO);
+            var core = document.createElementNS(SVGNS, "circle");
+            core.setAttribute("cx", "8");
+            core.setAttribute("cy", "8");
+            core.setAttribute("r", "3");
+            core.setAttribute("fill", "#007AFF");
+            svg.appendChild(ring);
+            svg.appendChild(core);
+            t.insertBefore(svg, t.firstChild);
           }
         }
       }
