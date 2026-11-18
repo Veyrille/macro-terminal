@@ -1059,6 +1059,18 @@
         if (fmt === "one") return v.toFixed(1);
         return v.toFixed(2);
       }
+      /* 均值锚线标签：由近 24 个月原始历史序列实时算出的均值 + 单位（不写死） */
+      function fmtMean(key, mean) {
+        switch (key) {
+          case "payems": return "均 " + (mean > 50 ? mean / 10 : mean).toFixed(1) + "万"; /* 序列为千人，>50 判定后换算万人（与 META 口径归一一致） */
+          case "icsa": return "均 " + mean.toFixed(1) + "万";
+          case "jolts": return "均 " + Math.round(mean) + "万";
+          case "unrate": case "wage": case "gdp": case "retail": return "均 " + mean.toFixed(1) + "%";
+          case "dgs2": case "dgs10": case "ffr": return "均 " + mean.toFixed(2) + "%";
+          case "usd": return "均 " + mean.toFixed(1);
+          default: return "均 " + mean.toFixed(1);
+        }
+      }
       function genLabels(range, n) {
         var out = [];
         if (range[0].indexOf("Q") >= 0) {
@@ -1100,21 +1112,24 @@
         }
         var nums = disp.filter(function (v) { return v !== null; });
         var min0 = Math.min.apply(null, nums), max0 = Math.max.apply(null, nums);
-        var mean = nums.reduce(function (a, b) { return a + b; }, 0) / nums.length;
+        /* 均值由原始历史序列（未插值的真实值）实时计算，锚线位置与右侧标签共用此值 */
+        var rawNums = vals.filter(function (v) { return v !== null; });
+        var meanSrc = rawNums.length ? rawNums : nums;
+        var mean = meanSrc.reduce(function (a, b) { return a + b; }, 0) / meanSrc.length;
         var min = min0, max = max0;
         if (min === max) { min -= 1; max += 1; }
         var span = max - min; min -= span * 0.15; max += span * 0.15;
         var W = 300, H = (box.classList && box.classList.contains("spark-lg")) ? 120 : 56, P = 5;
-        /* 右侧预留 58px 空白文字区：曲线只画到 x = W-58，参考虚线贯穿全宽，
-           「0.2% 基准 / 均值」文字固定在 x = W-52，与最新红点永不重叠 */
-        var PLOT_RIGHT = W - 58;
+        /* 右侧预留 64px 空白文字区：曲线只画到 x = W-68，参考虚线贯穿全宽，
+           「0.2% 基准 / 均 X.XX 单位」文字固定在 x = W-62，与最新红点永不重叠且不被切边 */
+        var PLOT_RIGHT = W - 68;
         function X(i) { return P + i * (PLOT_RIGHT - P) / (disp.length - 1); }
         function Y(v) { return H - P - (v - min) / (max - min) * (H - 2 * P); }
         var pts = disp.map(function (v, i) { return [X(i), Y(v)]; });
         var lastI = disp.length - 1;
         var INF_ANCHOR = { cpi: 1, corecpi: 1, pce: 1, corepce: 1, ppi: 1, coreppi: 1 };
         var anchorV = INF_ANCHOR[key] ? 0.2 : mean;
-        var anchorText = INF_ANCHOR[key] ? "0.2% 基准" : "均值";
+        var anchorText = INF_ANCHOR[key] ? "0.2% 基准" : fmtMean(key, mean);
         var anchorY = Math.max(2, Math.min(H - 2, Y(anchorV)));
         var tone = box.dataset.tone || "";
         var toneVar = tone === "red" ? "var(--red)" : tone === "green" ? "var(--green)" : tone === "amber" ? "var(--amber)" : "var(--chart)";
@@ -1129,7 +1144,7 @@
         svg += '<path d="' + lineD + '" fill="none" style="stroke:var(--chart)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>';
         svg += '<circle cx="' + X(lastI).toFixed(1) + '" cy="' + Y(disp[lastI]).toFixed(1) + '" r="7" style="fill:' + toneVar + '" opacity="0.22"/>';
         svg += '<circle cx="' + X(lastI).toFixed(1) + '" cy="' + Y(disp[lastI]).toFixed(1) + '" r="3.5" style="fill:' + toneVar + '"/>';
-        svg += '<text x="' + (W - 52) + '" y="' + Math.max(10, anchorY - 4).toFixed(1) + '" text-anchor="start" font-size="10" style="fill:var(--ink-3)">' + anchorText + "</text>";
+        svg += '<text x="' + (W - 62) + '" y="' + Math.max(10, anchorY - 4).toFixed(1) + '" text-anchor="start" font-size="10" style="fill:var(--ink-3);font-variant-numeric:tabular-nums">' + anchorText + "</text>";
         svg += "</svg>";
         box.querySelector(".chart-slot").innerHTML = svg;
         box.querySelectorAll(".chart-ext, .chart-anchor").forEach(function (n) { n.parentNode.removeChild(n); });
