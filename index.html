@@ -164,6 +164,9 @@
       /* ---------- 导航栏吸顶容器：独立 sticky 常驻（仿 Telegram 文件夹栏） ---------- */
       .sticky-nav-wrapper {
         position: -webkit-sticky; position: sticky; top: 0; z-index: 100;
+        /* 高度严格锁死 62px（上 8 + 导航 44 + 下 10）：导航放大/缩小只允许在
+           .ios-glass-nav 上改 transform: scale()，包裹层高度恒定，绝不推拉下方卡片 */
+        height: 62px; flex-shrink: 0;
         padding: 8px 16px 10px 16px; background: transparent !important;
         max-width: 1280px; width: 100%; min-width: 0; box-sizing: border-box; margin: 0 auto;
         border: none !important; border-bottom: none !important; box-shadow: none !important;
@@ -247,12 +250,11 @@
       .ptr.spinning line { animation: ptrPetal 1s linear infinite; animation-delay: var(--d, 0s); }
       @keyframes ptrPetal { 0% { opacity: 0.85; } 100% { opacity: 0.15; } }
       /* ---------- sections ---------- */
-      .panel { display: none; padding-top: 18px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
-      .panel.active { display: block; animation: panelIn 0.16s ease-out; }
-      @keyframes panelIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
+      /* Tab 内容区禁止任何入场动画/过渡：opacity 0->1 渐变会让 WebKit 把面板临时
+         提升为 GPU 合成层，过渡结束图层销毁退回 CPU 渲染的瞬间，整页卡片会发生
+         1~2px 亚像素下跳。切换只做 display 显示/隐藏，干脆利落、零过渡 */
+      .panel { display: none; padding-top: 18px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; animation: none !important; transition: none !important; }
+      .panel.active { display: block; animation: none !important; transition: none !important; }
 
       /* ---------- badges ---------- */
       .badge {
@@ -1350,6 +1352,17 @@
       }
       function activate(tab, restoreScroll) {
         if (VALID_TABS.indexOf(tab) < 0) tab = "overview";
+        /* 切换 Tab 不得连带触发下拉刷新复位：非下拉状态下（未在下拉/刷新中），
+           同步强制主容器 .wrap 的 transform 回到 none 并清掉残留 transition，
+           防止残留 transform 让下方卡片在切换瞬间整体偏移一帧。
+           下拉刷新变量在本脚本后段才赋值，加载期恢复 Tab 时它们尚为 undefined，
+           typeof 守卫保证此时安全跳过 */
+        if (typeof wrapEl !== "undefined" && wrapEl &&
+            (typeof ptrBusy === "undefined" || !ptrBusy) &&
+            (typeof ptrDist === "undefined" || ptrDist === 0)) {
+          wrapEl.style.transition = "";
+          wrapEl.style.transform = "none";
+        }
         /* 切换触发的第一时间：先上锁并把导航栏强制恢复正常大小，
            再做任何 window.scrollTo，避免恢复滚动位置时被 scroll 监听误判为上滑而再次缩小 */
         lockNavForTabSwitch();
@@ -1382,8 +1395,11 @@
         if (restoreScroll === false) {
           window.scrollTo(0, 0);
         } else {
-          /* 目标 Tab 显示后立即恢复到离开它时的滚动位置 */
-          window.scrollTo({ top: tabScrollY[tab] || 0, behavior: "instant" });
+          /* 目标面板已在上方同步切换为显示：就在当前同步代码里立即恢复该 Tab
+             离开时的滚动位置。严禁包进 setTimeout / requestAnimationFrame 延迟
+             执行——浏览器会先按旧滚动位置画一帧、再瞬间跳到新位置，造成切换
+             完成那一瞬间卡片整体「往下震一下」的错觉 */
+          window.scrollTo(0, tabScrollY[tab] || 0);
         }
         lastScrollY = window.scrollY;
         moveGlider(tab);
