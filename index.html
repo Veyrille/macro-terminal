@@ -529,6 +529,57 @@
       .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
       .sheet-title { font-size: 17px; font-weight: 700; min-width: 0; }
       .sheet-title .period { font-size: 13px; font-weight: 400; color: var(--ink-3); margin-left: 6px; }
+      /* 抽屉顶部标题栏：左关闭按钮 + 中居中标题 + 右状态标签，三列对称网格，
+         中列 1fr 两侧各 52px，标题处于抽屉绝对水平中心 */
+      .sheet-header-row {
+        display: grid;
+        grid-template-columns: 52px 1fr 52px;
+        align-items: center;
+        width: 100%;
+        padding: 4px 0 12px 0;
+        box-sizing: border-box;
+      }
+      /* 左列液态玻璃圆形关闭按钮：材质复用顶部导航栏 iOS 26 液态玻璃 */
+      .sheet-close-btn {
+        justify-self: start;
+        width: 32px; height: 32px; min-height: 32px;
+        border-radius: 999px;
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0; margin: 0; cursor: pointer; flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.55);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: none;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8), 0 2px 10px rgba(0, 0, 0, 0.06);
+        color: #1C1C1E;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .sheet-close-btn svg { display: block; flex-shrink: 0; }
+      .sheet-close-btn:active { opacity: 0.72; }
+      .sheet-close-btn:focus-visible { outline: 2px solid var(--next-dot); outline-offset: 2px; }
+      @media (prefers-color-scheme: dark) {
+        .sheet-close-btn {
+          background: rgba(58, 58, 60, 0.65);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: none;
+          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 2px 10px rgba(0, 0, 0, 0.35);
+          color: #FFFFFF;
+        }
+      }
+      /* 中列居中标题：指标名 16px 加粗 + 月份 13px 弱化灰，基线对齐 */
+      .sheet-header-title {
+        justify-self: center;
+        display: flex; align-items: baseline; justify-content: center; gap: 6px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        min-width: 0; max-width: 100%;
+        font-size: 16px; font-weight: 700; line-height: 1.3; color: var(--ink);
+        text-align: center;
+      }
+      .sheet-header-title .sheet-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+      .sheet-header-title .period { font-size: 13px; font-weight: 400; color: var(--ink-3); white-space: nowrap; flex-shrink: 0; }
+      /* 右列状态标签：靠右对齐，与左列 52px 完全对称平衡 */
+      .sheet-header-badge { justify-self: end; display: inline-flex; align-items: center; justify-content: flex-end; min-width: 0; }
       .sheet-big { font-size: 38px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin: 6px 0 12px; }
       .sheet-big .unit { font-size: 14px; font-weight: 500; color: var(--ink-2); margin-left: 4px; }
       .sheet-compare { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
@@ -1782,7 +1833,7 @@
           /* 标题行只保留指标名 + 期次月份（如「11月」），不再拼「 · 待公布」；
              状态只由右上角灰色小标签表达 */
           var periodTxt = ev.periodLabel ? ev.periodLabel : "";
-          html = '<div class="sheet-head"><div class="sheet-title">' + c.name + '<span class="period">' + periodTxt + "</span></div>" + badge + "</div>";
+          html = '<div class="sheet-header-row"><button type="button" class="sheet-close-btn" aria-label="关闭"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 3 L11 11 M11 3 L3 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><div class="sheet-header-title"><span class="sheet-name">' + c.name + '</span>' + (periodTxt ? '<span class="period">' + periodTxt + "</span>" : "") + '</div><div class="sheet-header-badge">' + badge + "</div></div>";
           html += '<div class="sheet-big">待公布' + (ev.releaseText ? '<span class="unit">' + ev.releaseText + " 公布</span>" : "") + "</div>";
           if (m) {
             /* 三格与被点的日历行严格一致：预期 = 该行预期格（nextExpected，无则 --）；
@@ -1800,7 +1851,7 @@
           /* ===== 模式 A（含模式 C）：T 期已公布。标题用已公布月份 + 利多/利空标签；
              大字 = T 期实值；三格 = T 期预期 expected / T-1 前值 / T 期同比 ===== */
           badge = st ? badgeSpan(st) : ('<span class="badge ' + c.badge[0] + '">' + c.badge[1] + "</span>");
-          html = '<div class="sheet-head"><div class="sheet-title">' + c.name + '<span class="period">' + c.period + "</span></div>" + badge + "</div>";
+          html = '<div class="sheet-header-row"><button type="button" class="sheet-close-btn" aria-label="关闭"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 3 L11 11 M11 3 L3 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><div class="sheet-header-title"><span class="sheet-name">' + c.name + '</span>' + (c.period ? '<span class="period">' + c.period + "</span>" : "") + '</div><div class="sheet-header-badge">' + badge + "</div></div>";
           html += '<div class="sheet-big mono">' + (m ? fmtCore(m, m.value) : c.big) + (c.unit ? '<span class="unit">' + c.unit + "</span>" : "") + "</div>";
           if (m) {
             html += '<div class="sheet-compare">' +
@@ -1887,6 +1938,10 @@
           if (!sheetOpenState) { sheetMask.hidden = true; sheetEl.hidden = true; }
         }, 400);
       }
+      if (sheetBody) sheetBody.addEventListener("click", function (e) {
+        var btn = e.target && e.target.closest ? e.target.closest(".sheet-close-btn") : null;
+        if (btn) closeSheet();
+      });
       if (sheetMask) sheetMask.addEventListener("click", closeSheet);
       document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
       /* 小灰条跟手拖拽（.sheet-handle-zone 36px 热区，touch-action:none）：只有两级吸附高度。
