@@ -69,6 +69,8 @@
         /* 列表实体分割线：纯实色（非半透明），抗锯齿后每条深浅完全一致 */
         --divider: #EFEFF4;
         --cal-gray: #C7C7CC;
+        /* 胶囊重要性圆点·常规级中性灰（核心/重要级直接复用 --red / --amber） */
+        --imp-reg: #AEAEB2;
       }
       @media (prefers-color-scheme: dark) {
       :root {
@@ -116,6 +118,7 @@
         --pill-ink: #FFFFFF;
         --glass-ink: rgba(235, 235, 245, 0.60);
         --cal-gray: #48484A;
+        --imp-reg: #636366;
       }
       }
       @media (prefers-color-scheme: dark) {
@@ -534,8 +537,10 @@
       .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
       .sheet-title { font-size: 17px; font-weight: 700; min-width: 0; }
       .sheet-title .period { font-size: 13px; font-weight: 400; color: var(--ink-3); margin-left: 6px; }
-      /* 抽屉顶部标题栏：左关闭按钮 + 中居中标题 + 右状态标签，三列对称网格，
-         中列 1fr 两侧各 56px，标题处于抽屉绝对水平中心 */
+      /* 抽屉顶部标题栏：左关闭按钮 + 中居中标题 + 右空占位，三列对称网格，
+         中列 1fr 两侧各 56px，标题处于抽屉绝对水平中心；
+         状态标签已下移至胶囊切换栏下方的大字行最右侧（见 .sheet-big-row），
+         顶部不再放标签，标题与关闭按钮互不干扰 */
       .sheet-header-row {
         display: grid;
         grid-template-columns: 56px 1fr 56px;
@@ -586,8 +591,13 @@
       }
       .sheet-header-title .sheet-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
       .sheet-header-title .period { font-size: 13px; font-weight: 400; color: var(--ink-3); white-space: nowrap; flex-shrink: 0; }
-      /* 右列状态标签：靠右对齐，与左列 56px 完全对称平衡 */
-      .sheet-header-badge { justify-self: end; display: inline-flex; align-items: center; justify-content: flex-end; min-width: 0; }
+      /* 右列空占位：不放任何内容，只与左列 56px 对称，保证中列标题绝对居中 */
+      .sheet-header-spacer { justify-self: end; width: 40px; height: 40px; }
+      /* 大字行：核心大字（左） + 状态标签（最右）同一水平行——标签归属当前
+         选中的子指标，切换胶囊时随 buildSheetHTML 按 sheetActiveKey 独立重算 */
+      .sheet-big-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 6px 0 12px; }
+      .sheet-big-row .sheet-big { margin: 0; min-width: 0; }
+      .sheet-big-badge { flex-shrink: 0; display: inline-flex; align-items: center; }
       /* 同场指标切换分段胶囊（Segmented Switcher）：标题栏正下方一行，
          苹果原生分段控件观感——浅灰底槽（--seg-bg）+ 选中项凸起胶囊
          （--seg-active-bg，浅色纯白 / 深色深灰），双色变量已在 :root 双套定义 */
@@ -610,6 +620,14 @@
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14), inset 0 0 0 0.5px rgba(0, 0, 0, 0.04);
       }
       .sheet-switch-btn:focus-visible { outline: 2px solid var(--next-dot); outline-offset: 1px; }
+      /* 胶囊文字左侧的重要性圆点（5px 纯色正圆）：按单个子指标分级——
+         核心 = 苹果红 var(--red)（浅 #FF3B30 / 深 #FF453A）、
+         重要 = 苹果橙黄 var(--amber)（浅 #FF9500 / 深 #FF9F0A）、
+         常规 = 中性灰 var(--imp-reg)（浅 #AEAEB2 / 深 #636366）；
+         与日历行左侧 3px 竖条（按同场最高重要性着色）分工：一外一内 */
+      .sheet-imp-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin-right: 5px; flex-shrink: 0; vertical-align: middle; background: var(--imp-reg); }
+      .sheet-imp-dot.core { background: var(--red); }
+      .sheet-imp-dot.high { background: var(--amber); }
       .sheet-big { font-size: 38px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin: 6px 0 12px; }
       .sheet-big .unit { font-size: 14px; font-weight: 500; color: var(--ink-2); margin-left: 4px; }
       .sheet-compare { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
@@ -1859,6 +1877,11 @@
       var sheetEvBase = null;
       var sheetEvKey = null;
       var SHEET_SHORT = { payems: "非农就业", unrate: "失业率", wage: "平均时薪", cpi: "CPI", corecpi: "核心 CPI", icsa: "初请", ppi: "PPI", coreppi: "核心 PPI", pce: "PCE", corepce: "核心 PCE", gdp: "GDP", jolts: "JOLTS", "ism-mfg": "ISM 制造业", "ism-svc": "ISM 服务业" };
+      /* 每个子指标的重要性级别（胶囊圆点配色，与日历竖条分级口径一致）：
+         core = 核心（红，FOMC 决议级，当前胶囊指标中无此级）、
+         high = 重要（橙黄：非农/失业率/CPI/核心 CPI/PCE/核心 PCE）、
+         reg  = 常规（灰：时薪/初请/GDP/PPI/核心 PPI/JOLTS/ISM 等） */
+      var SHEET_IMP = { payems: "high", unrate: "high", wage: "reg", cpi: "high", corecpi: "high", icsa: "reg", ppi: "reg", coreppi: "reg", pce: "high", corepce: "high", gdp: "reg", jolts: "reg", "ism-mfg": "reg", "ism-svc": "reg" };
       function cardIdForKey(k) {
         if (CARD_IDS[k]) return CARD_IDS[k];
         if (k === "ism-mfg") return "card-ism-mfg";
@@ -1873,11 +1896,12 @@
         if (k === sheetEvKey) return sheetEvBase;
         return { periodLabel: sheetEvBase.periodLabel, releaseText: sheetEvBase.releaseText, releaseISO: sheetEvBase.releaseISO, prevText: "", expectedText: "" };
       }
-      /* 同场切换胶囊栏：仅关联指标 >= 2 时渲染（标题栏正下方一行） */
+      /* 同场切换胶囊栏：仅关联指标 >= 2 时渲染（标题栏正下方一行）；
+         每个胶囊文字左侧带一颗 5px 重要性圆点（SHEET_IMP 分级配色） */
       function sheetSwitcherHtml() {
         if (!sheetRelated || sheetRelated.length < 2) return "";
         return '<div class="sheet-switcher" role="tablist" aria-label="同场指标切换">' + sheetRelated.map(function (k) {
-          return '<button type="button" class="sheet-switch-btn" role="tab" data-sheet-key="' + k + '" aria-selected="' + (k === sheetActiveKey ? "true" : "false") + '">' + (SHEET_SHORT[k] || k) + "</button>";
+          return '<button type="button" class="sheet-switch-btn" role="tab" data-sheet-key="' + k + '" aria-selected="' + (k === sheetActiveKey ? "true" : "false") + '"><span class="sheet-imp-dot ' + (SHEET_IMP[k] || "reg") + '" aria-hidden="true"></span>' + (SHEET_SHORT[k] || k) + "</button>";
         }).join("") + "</div>";
       }
       function buildSheetHTML(c) {
@@ -1888,15 +1912,15 @@
         var ev = upcoming ? sheetEvFor(key) : null;
         var html, badge;
         if (upcoming) {
-          /* ===== 模式 B：T+1 期待公布。标题用日历期次 + 灰色「待公布」标签；
+          /* ===== 模式 B：T+1 期待公布。标题用日历期次；
              大字只写「待公布」+ 公布时间，绝不把 T 期实值当成本期大字 ===== */
           badge = '<span class="badge gray">待公布</span>';
-          /* 标题行只保留指标名 + 期次月份（如「11月」），不再拼「 · 待公布」；
-             状态只由右上角灰色小标签表达 */
+          /* 标题行只保留关闭按钮 + 居中「指标名 + 期次月份」（如「11月」），
+             右列为空占位保持对称；状态标签下移到大字行最右侧（见下方 sheet-big-row） */
           var periodTxt = ev.periodLabel ? ev.periodLabel : "";
-          html = '<div class="sheet-header-row"><button type="button" class="sheet-close-btn" aria-label="关闭"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><div class="sheet-header-title"><span class="sheet-name">' + c.name + '</span>' + (periodTxt ? '<span class="period">' + periodTxt + "</span>" : "") + '</div><div class="sheet-header-badge">' + badge + "</div></div>";
+          html = '<div class="sheet-header-row"><button type="button" class="sheet-close-btn" aria-label="关闭"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><div class="sheet-header-title"><span class="sheet-name">' + c.name + '</span>' + (periodTxt ? '<span class="period">' + periodTxt + "</span>" : "") + '</div><div class="sheet-header-spacer" aria-hidden="true"></div></div>';
           html += sheetSwitcherHtml();
-          html += '<div class="sheet-big">待公布' + (ev.releaseText ? '<span class="unit">' + ev.releaseText + " 公布</span>" : "") + "</div>";
+          html += '<div class="sheet-big-row"><div class="sheet-big">待公布' + (ev.releaseText ? '<span class="unit">' + ev.releaseText + " 公布</span>" : "") + '</div><div class="sheet-big-badge">' + badge + "</div></div>";
           if (m) {
             /* 三格与被点的日历行严格一致：预期 = 该行预期格（nextExpected，无则 --）；
                前值（上期）= 该行前值格（T 期最新实值，不再退成 T-1）；
@@ -1910,12 +1934,13 @@
               '<div class="sc"><div class="l">上期定调</div><div class="v mono">' + lastTxt + "</div></div></div>";
           }
         } else {
-          /* ===== 模式 A（含模式 C）：T 期已公布。标题用已公布月份 + 利多/利空标签；
-             大字 = T 期实值；三格 = T 期预期 expected / T-1 前值 / T 期同比 ===== */
+          /* ===== 模式 A（含模式 C）：T 期已公布。标题用已公布月份，右列空占位；
+             大字 = T 期实值，利多/利空状态标签在大字行最右侧，随当前子指标独立变化；
+             三格 = T 期预期 expected / T-1 前值 / T 期同比 ===== */
           badge = st ? badgeSpan(st) : ('<span class="badge ' + c.badge[0] + '">' + c.badge[1] + "</span>");
-          html = '<div class="sheet-header-row"><button type="button" class="sheet-close-btn" aria-label="关闭"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><div class="sheet-header-title"><span class="sheet-name">' + c.name + '</span>' + (c.period ? '<span class="period">' + c.period + "</span>" : "") + '</div><div class="sheet-header-badge">' + badge + "</div></div>";
+          html = '<div class="sheet-header-row"><button type="button" class="sheet-close-btn" aria-label="关闭"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><div class="sheet-header-title"><span class="sheet-name">' + c.name + '</span>' + (c.period ? '<span class="period">' + c.period + "</span>" : "") + '</div><div class="sheet-header-spacer" aria-hidden="true"></div></div>';
           html += sheetSwitcherHtml();
-          html += '<div class="sheet-big mono">' + (m ? fmtCore(m, m.value) : c.big) + (c.unit ? '<span class="unit">' + c.unit + "</span>" : "") + "</div>";
+          html += '<div class="sheet-big-row"><div class="sheet-big mono">' + (m ? fmtCore(m, m.value) : c.big) + (c.unit ? '<span class="unit">' + c.unit + "</span>" : "") + '</div><div class="sheet-big-badge">' + badge + "</div></div>";
           if (m) {
             html += '<div class="sheet-compare">' +
               '<div class="sc"><div class="l">预期</div><div class="v mono">' + (m.expected !== null && m.expected !== undefined ? fmtCore(m, m.expected) + metaCp(m) : "暂无预期") + "</div></div>" +
