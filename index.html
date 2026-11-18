@@ -419,28 +419,47 @@
       .note-rows b { color: var(--ink); font-weight: 600; }
 
       /* ---------- calendar ---------- */
-      .cal-table { background: var(--surface); border: none; border-radius: 16px; padding: 6px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; margin-bottom: 22px; }
+      .cal-table { background: var(--surface); border: none; border-radius: 16px; padding: 6px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; margin-bottom: 22px; overflow: visible; }
       .cal-table:last-of-type { margin-bottom: 0; }
       .cal-month-label {
         font-size: 15px; font-weight: 700; color: var(--ink-2);
         margin: 20px 0 8px;
       }
       .cal-month-label:first-child { margin-top: 2px; }
-      /* 「下一场」呼吸圆点：标在最近一场未公布事件的行首 */
+      /* 「下一场」呼吸圆点：标在最近一场未公布事件的行首。
+         圆点套 14×14px 包裹框居中：四周各留 4px 光晕空间，呼吸光圈最大扩散
+         恰好 4px（6px 圆点扩到 14px），父级链全部 overflow: visible，绝不裁切 */
+      .next-dot-wrap {
+        position: relative;
+        width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center;
+        flex-shrink: 0; margin-left: 2px; margin-right: 4px; overflow: visible; vertical-align: middle;
+      }
+      /* 呼吸光圈：以包裹框为宿主独立扩散，不受圆点自身缩放叠加影响 */
+      .next-dot-wrap::after {
+        content: ""; position: absolute; left: 50%; top: 50%;
+        width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%;
+        background: var(--next-dot); pointer-events: none;
+        animation: nextDotHalo 1.6s ease-in-out infinite;
+      }
       .next-dot {
-        display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-        background: var(--next-dot); margin-right: 6px; vertical-align: 2px;
+        position: relative; z-index: 1; display: block; flex-shrink: 0;
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--next-dot);
         animation: nextDotPulse 1.6s ease-in-out infinite;
       }
       @keyframes nextDotPulse {
         0%, 100% { transform: scale(1); opacity: 1; }
         50% { transform: scale(1.4); opacity: 0.5; }
       }
+      @keyframes nextDotHalo {
+        0% { transform: scale(1); opacity: 0.35; }
+        70%, 100% { transform: scale(2.33); opacity: 0; }
+      }
       .cal-head { display: none; }
       /* 日历行与「最新数据一览」同款：整数 padding 12px + 整数 line-height 20px，
          行高为整数像素；分割线同样用文档流实体 .list-divider 节点（见概览区定义） */
       .cal-row {
-        display: flex; align-items: stretch;
+        display: flex; align-items: stretch; overflow: visible;
         padding: 12px; border-radius: 10px; background: transparent; line-height: 20px;
         transition: background-color 0.15s ease, opacity 0.18s ease;
       }
@@ -457,9 +476,9 @@
       .cal-row.imp-core .cal-bar { background: var(--red); }
       .cal-row.imp-high .cal-bar { background: var(--amber); }
       .cal-row.past { opacity: .5; }
-      .cal-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
-      .cal-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-      .c-time { font-size: 13px; font-weight: 600; white-space: nowrap; }
+      .cal-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; overflow: visible; }
+      .cal-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; overflow: visible; }
+      .c-time { font-size: 13px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; overflow: visible; }
       .c-time .wk { color: var(--ink-3); font-weight: 400; font-size: 12px; margin-left: 4px; }
       .c-ev { font-size: 13.5px; font-weight: 600; min-width: 0; margin-top: 2px; overflow-wrap: break-word; }
       .c-ev .note { display: block; color: var(--ink-2); font-size: 12px; font-weight: 400; margin-top: 1px; }
@@ -497,13 +516,14 @@
       .sheet {
         position: fixed; left: 0; right: 0; bottom: 0; z-index: 201;
         max-width: 720px; margin: 0 auto; height: 62vh; height: 62dvh;
+        max-height: calc(100dvh - env(safe-area-inset-top, 16px));
         background: var(--surface); border-radius: 20px 20px 0 0;
         box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
         transform: translateY(103%); transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), height 0.36s cubic-bezier(0.32, 0.72, 0, 1);
         display: flex; flex-direction: column; overflow: hidden;
       }
       .sheet.open { transform: translateY(0); }
-      .sheet.expanded { height: 88vh; height: 88dvh; }
+      .sheet.expanded { height: 96vh; height: 96dvh; max-height: calc(100dvh - env(safe-area-inset-top, 16px)); }
       .sheet-grab, .sheet-handle-zone { height: 36px; min-height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; flex: 0 0 36px; cursor: grab; touch-action: none; }
       .sheet-handle { width: 36px; height: 5px; border-radius: 3px; background: var(--cal-gray); display: block; }
       .sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 6px 20px calc(24px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; }
@@ -1871,15 +1891,15 @@
       /* 小灰条跟手拖拽（.sheet-handle-zone 36px 热区，touch-action:none）：只有两级吸附高度。
          touchstart：记录 startY 与当前高度 startHeight，立刻关掉高度过渡，拖动才不发粘；
          touchmove：preventDefault 后按 newHeight = startHeight + (startY - currentY) 实时
-           写 height，抽屉上沿 1:1 贴着手指走；超过 88dvh 上限的部分施加 0.25 倍橡皮筋阻尼；
+           写 height，抽屉上沿 1:1 贴着手指走；超过 96dvh 上限的部分施加 0.25 倍橡皮筋阻尼；
          touchend：恢复苹果弹簧过渡，按拖动幅度/松手高度吸附——半屏上拉 >40px（或过两档
-           中点）→ 88dvh 大屏；大屏下拉 >40px → 回半屏；半屏下拉 >65px → 关闭；
+           中点）→ 96dvh 大屏；大屏下拉 >40px → 回半屏；半屏下拉 >65px → 关闭；
            幅度不足阈值则弹回松手前那一档。 */
       (function () {
         var grab = document.getElementById("sheetGrab");
         if (!grab || !sheetEl) return;
         var startY = null, startHeight = 0, curHeight = 0, wasExpanded = false;
-        function expandedPx() { return Math.round(window.innerHeight * 0.88); }
+        function expandedPx() { return Math.round(window.innerHeight * 0.96); }
         function mediumPx() { return sheetMediumPx > 0 ? sheetMediumPx : Math.round(window.innerHeight * 0.62); }
         grab.addEventListener("touchstart", function (e) {
           if (!e.touches || !e.touches.length) return;
@@ -2017,19 +2037,24 @@
         }
         if (found === nextMarkedRow) return;
         if (nextMarkedRow) {
+          var oldWrap = nextMarkedRow.querySelector(".next-dot-wrap");
+          if (oldWrap) oldWrap.parentNode.removeChild(oldWrap);
           var oldDot = nextMarkedRow.querySelector(".next-dot");
-          if (oldDot) oldDot.parentNode.removeChild(oldDot);
+          if (oldDot && oldDot.parentNode) oldDot.parentNode.removeChild(oldDot);
           nextMarkedRow.classList.remove("next-up");
         }
         nextMarkedRow = found;
         if (found) {
           found.classList.add("next-up");
           var t = found.querySelector(".c-time");
-          if (t && !t.querySelector(".next-dot")) {
+          if (t && !t.querySelector(".next-dot-wrap")) {
+            var wrap = document.createElement("span");
+            wrap.className = "next-dot-wrap";
+            wrap.setAttribute("aria-hidden", "true");
             var dot = document.createElement("span");
             dot.className = "next-dot";
-            dot.setAttribute("aria-hidden", "true");
-            t.insertBefore(dot, t.firstChild);
+            wrap.appendChild(dot);
+            t.insertBefore(wrap, t.firstChild);
           }
         }
       }
