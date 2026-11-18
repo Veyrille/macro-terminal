@@ -910,6 +910,10 @@
       /* 未来一期专用预期：与已公布期的 expected 严格分离。日历只读 futureExpected，
          未到公布前无未来预期时为 null，日历统一显示 --，绝不回填历史预期。 */
       Object.keys(META).forEach(function (k) { if (META[k].futureExpected === undefined) META[k].futureExpected = null; });
+      /* INDICATORS 与 META 是同一个对象（别名，非拷贝）：卡片 cardHTML、底部抽屉 openSheet、
+         日历 bindCalPrev 全部只读这一个合并后的数据源，预期合并只在 applyLiveData 里做一次，
+         三处渲染永远一致，不存在卡片有预期、抽屉丢预期的分叉。 */
+      var INDICATORS = META;
       function metaOf(c) {
         if (c.series) return c.series;
         return c.name.indexOf("制造") >= 0 ? "ism-mfg" : "ism-svc";
@@ -957,7 +961,12 @@
       var MACRO_LOCAL_URL = "./macro_data.json";
       var LIVE_SOURCE = "";
       function applyLiveData(j) {
-        if (!j || (!j.series && !j.manual_overrides && !j.overrides && !j.expectations && !j.ism && !j.cme_fedwatch)) return false;
+        if (!j || (!j.series && !j.manual_overrides && !j.overrides && !j.expectations && !j.future_expectations && !j.future_expectation_details && !j.ism && !j.cme_fedwatch)) return false;
+        /* 合并前先快照前端内置的已公布历史预期（如 10 月 CPI +0.3%、核心 CPI +0.2%、
+           ISM 制造业 54.6、服务业 54.8）：合并结束后凡被刷成空值的，一律按快照恢复，
+           保证刷新实时数据绝不把已公布那一期的历史预期覆盖成空（合并铁律第 2 条）。 */
+        var builtinExpected = {};
+        Object.keys(META).forEach(function (bk) { builtinExpected[bk] = META[bk].expected; });
         var map = { CPIAUCSL: "cpi", CPILFESL: "corecpi", PCEPI: "pce", PCEPILFE: "corepce",
           PPIFIS: "ppi", PPIFES: "coreppi", PAYEMS: "payems", UNRATE: "unrate",
           CES0500000003: "wage", ICSA: "icsa", JTSJOL: "jolts", A191RL1Q225SBEA: "gdp",
@@ -986,11 +995,38 @@
           if (typeof sd.yoy === "number") m.yoy = sd.yoy;
         });
         var ov = j.manual_overrides || j.overrides || {};
-        /* 市场预期：新版 overrides 用 expectations（复数），兼容旧版 expected（单数）与顶层字段 */
-        var expMap = ov.expectations || ov.expected || j.expectations || null;
-        if (expMap) Object.keys(expMap).forEach(function (k) {
-          var key = map[k] || k;
-          if (META[key] && typeof expMap[k] === "number") META[key].expected = expMap[k];
+        /* ============ 市场预期合并（优先级铁律，卡片/抽屉/日历共用 INDICATORS 同一对象） ============
+           expected（已公布期预期，卡片与抽屉读）：
+             1) 优先取 macro_data.json 中 overrides / manual_overrides 提供的最新预期
+                （expectations 复数与 expected 单数两个来源都合并，不再用 || 短路丢源）；
+             2) JSON 未提供或为空（null / 缺字段 / 非数字）时，保留前端内置的历史预期，
+                只有真正的数字才允许写入，空值永远不覆盖（函数末尾还有快照恢复兜底）。
+           futureExpected（未来一期预期，日历读）：
+             只取脚本从 ForexFactory 自动抓取并写入顶层的 expectations / future_expectations
+             （未来两周窗口内最早一场未公布的 forecast）与 future_expectation_details 明细；
+             抓不到的远期月份保持 null，日历显示 --，绝不回填已公布期的历史 expected。 */
+        var ISM_CODE_ALIAS = { ism_mfg: "ism-mfg", ism_svc: "ism-svc", "ism-mfg": "ism-mfg", "ism-svc": "ism-svc" };
+        function keyOfCode(k) { return map[k] || ISM_CODE_ALIAS[k] || k; }
+        function setExpected(k, val) {
+          var key = keyOfCode(k);
+          if (META[key] && typeof val === "number" && isFinite(val)) META[key].expected = val;
+        }
+        function setFutureExpected(k, val) {
+          var key = keyOfCode(k);
+          if (META[key] && typeof val === "number" && isFinite(val)) META[key].futureExpected = val;
+        }
+        [ov.expected, ov.expectations].forEach(function (src) {
+          if (!src) return;
+          Object.keys(src).forEach(function (k) { setExpected(k, src[k]); });
+        });
+        [j.future_expectations, j.expectations].forEach(function (src) {
+          if (!src) return;
+          Object.keys(src).forEach(function (k) { setFutureExpected(k, src[k]); });
+        });
+        var fed = j.future_expectation_details || null;
+        if (fed) Object.keys(fed).forEach(function (k) {
+          var d = fed[k];
+          if (d && typeof d.forecast === "number") setFutureExpected(k, d.forecast);
         });
         /* ISM 制造业 / 服务业：来自 overrides.ism，FRED 无此序列，靠手动覆写带入 */
         var ism = ov.ism || j.ism || null;
@@ -1025,6 +1061,12 @@
           var bd = document.querySelector(".base-date");
           if (bd) bd.textContent = "数据更新 " + String(j.updated_at_bjt).slice(0, 10);
         }
+        /* 快照恢复兜底：任何指标的 expected 若在本次合并后变成空值、而内置基准原本有值，
+           一律恢复内置历史预期（10 月 CPI +0.3%、核心 CPI +0.2%、ISM 制造业 54.6、服务业 54.8 等） */
+        Object.keys(META).forEach(function (rk) {
+          if ((META[rk].expected === null || META[rk].expected === undefined) &&
+              typeof builtinExpected[rk] === "number") META[rk].expected = builtinExpected[rk];
+        });
         LIVE_ON = true;
         return true;
       }
