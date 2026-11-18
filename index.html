@@ -267,6 +267,8 @@
       .badge.red.soft { color: var(--red); background: var(--badge-red-bg-soft); }
       .badge.green { color: var(--badge-green); background: var(--badge-green-bg); }
       .badge.amber { color: var(--amber); background: var(--amber-bg); }
+      /* 待公布（抽屉模式 B）：中性灰，不带任何方向定调色彩 */
+      .badge.gray { color: var(--ink-2); background: var(--seg-bg); }
 
       /* ---------- overview board ---------- */
       .ov-board { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); gap: 16px; margin-bottom: 22px; width: 100%; min-width: 0; box-sizing: border-box; }
@@ -928,9 +930,12 @@
         usd:     { value: 121.88, prev: 121.51, expected: null, yoy: null, kind: "hot", tol: 0.5, disp: "num2" },
         ffr:     { value: 4.00, prev: 3.75, expected: null, yoy: null, kind: "hot", tol: 0.01, disp: "range" }
       };
-      /* 未来一期专用预期：与已公布期的 expected 严格分离。日历只读 futureExpected，
-         未到公布前无未来预期时为 null，日历统一显示 --，绝不回填历史预期。 */
-      Object.keys(META).forEach(function (k) { if (META[k].futureExpected === undefined) META[k].futureExpected = null; });
+      /* 期次拆分（底层铁律）：expected 与 nextExpected 是两个独立字段，绝不互相覆盖——
+         expected = 最近已公布一期（T 期）当时的市场预期（如 10 月 CPI +0.3%、核心 CPI +0.2%、
+         ISM 制造业 54.6、服务业 54.8），卡片与抽屉模式 A 读它；
+         nextExpected = 日历上即将公布的下一期（T+1 期）的市场预期，只由 ForexFactory
+         future_expectations 合并写入，日历与抽屉模式 B 读它；暂未到两周窗口时为 null，显示 --。 */
+      Object.keys(META).forEach(function (k) { if (META[k].nextExpected === undefined) META[k].nextExpected = null; });
       /* INDICATORS 与 META 是同一个对象（别名，非拷贝）：卡片 cardHTML、底部抽屉 openSheet、
          日历 bindCalPrev 全部只读这一个合并后的数据源，预期合并只在 applyLiveData 里做一次，
          三处渲染永远一致，不存在卡片有预期、抽屉丢预期的分叉。 */
@@ -1038,19 +1043,20 @@
                 （expectations 复数与 expected 单数两个来源都合并，不再用 || 短路丢源）；
              2) JSON 未提供或为空（null / 缺字段 / 非数字）时，保留前端内置的历史预期，
                 只有真正的数字才允许写入，空值永远不覆盖（函数末尾还有快照恢复兜底）。
-           futureExpected（未来一期预期，日历读）：
+           nextExpected（下一期 T+1 预期，日历与抽屉模式 B 读）：
              只取脚本从 ForexFactory 自动抓取并写入顶层的 expectations / future_expectations
              （未来两周窗口内最早一场未公布的 forecast）与 future_expectation_details 明细；
-             抓不到的远期月份保持 null，日历显示 --，绝不回填已公布期的历史 expected。 */
+             抓不到的远期月份保持 null，日历显示 --，绝不回填已公布期的历史 expected；
+             setExpected 与 setNextExpected 各写各的字段，任何一路合并都不会动另一路。 */
         var ISM_CODE_ALIAS = { ism_mfg: "ism-mfg", ism_svc: "ism-svc", "ism-mfg": "ism-mfg", "ism-svc": "ism-svc" };
         function keyOfCode(k) { return map[k] || ISM_CODE_ALIAS[k] || k; }
         function setExpected(k, val) {
           var key = keyOfCode(k);
           if (META[key] && typeof val === "number" && isFinite(val)) META[key].expected = val;
         }
-        function setFutureExpected(k, val) {
+        function setNextExpected(k, val) {
           var key = keyOfCode(k);
-          if (META[key] && typeof val === "number" && isFinite(val)) META[key].futureExpected = val;
+          if (META[key] && typeof val === "number" && isFinite(val)) META[key].nextExpected = val;
         }
         [ov.expected, ov.expectations].forEach(function (src) {
           if (!src) return;
@@ -1058,12 +1064,12 @@
         });
         [j.future_expectations, j.expectations].forEach(function (src) {
           if (!src) return;
-          Object.keys(src).forEach(function (k) { setFutureExpected(k, src[k]); });
+          Object.keys(src).forEach(function (k) { setNextExpected(k, src[k]); });
         });
         var fed = j.future_expectation_details || null;
         if (fed) Object.keys(fed).forEach(function (k) {
           var d = fed[k];
-          if (d && typeof d.forecast === "number") setFutureExpected(k, d.forecast);
+          if (d && typeof d.forecast === "number") setNextExpected(k, d.forecast);
         });
         /* 已公布实值：脚本写入的 actual_details（ForexFactory actual 优先）/ actuals（平铺数值）。
            只收真正的数字与可解析的公布时间，供日历 refreshCalendar 按周期绑定与定调。 */
@@ -1391,11 +1397,11 @@
           /* 前值（未来待公布一期的上一期）= 最新已公布实值 INDICATORS[id].latest */
           if (key === "ffr") vvs[0].textContent = (m.value - 0.25).toFixed(2) + "%-" + m.value.toFixed(2) + "%";
           else vvs[0].textContent = fmtCore(m, m.value) + (m.cal || "");
-          /* 预期只读未来一期专用字段 futureExpected；无未来预期统一 --，
-             绝不把已公布期的历史 expected 错填到未来日历上 */
+          /* 预期只读下一期专用字段 nextExpected（T+1 期）；无下期预期统一 --，
+             绝不把已公布期（T 期）的历史 expected 错填到未来日历上 */
           if (vvs[1]) {
-            vvs[1].textContent = (m.futureExpected !== null && m.futureExpected !== undefined)
-              ? fmtCore(m, m.futureExpected) + (m.cal || "") : "--";
+            vvs[1].textContent = (m.nextExpected !== null && m.nextExpected !== undefined)
+              ? fmtCore(m, m.nextExpected) + (m.cal || "") : "--";
           }
         });
       }
@@ -1452,7 +1458,7 @@
             actual = m.value; /* FRED 最新一期实值（与卡片同源同值） */
           }
           if (actual === null) return;
-          if (exp === null && typeof m.futureExpected === "number") exp = m.futureExpected;
+          if (exp === null && typeof m.nextExpected === "number") exp = m.nextExpected;
           if (prev === null && typeof m.prev === "number") prev = m.prev;
           var st = statusForActual(m, actual, exp, prev);
           /* 签名未变就不重写 DOM：tick 每秒跑一遍，徽章不能每秒重建 */
@@ -1659,8 +1665,51 @@
       var sheetExpanded = false;
       /* 半屏态精确像素高度：每次打开按内容实测（卡在往期数据标题上方），拖拽吸附共用 */
       var sheetMediumPx = 0;
-      /* openBottomSheet 为 openSheet 的别名（统一命名）：打开抽屉的唯一入口 */
-      function openBottomSheet(id) { openSheet(id); }
+      /* openBottomSheet(id, options)：打开抽屉的唯一入口，按点击来源分模式渲染——
+         模式 A（默认，无 options）：概览/各 Tab 点开，展示 T 期已公布数据；
+         模式 B（options = { mode: "upcoming", event }）：日历点「待公布」行，展示 T+1 期预告；
+         模式 C：日历点「已公布」行，调用方直接走模式 A（见 openFromRow）。 */
+      function openBottomSheet(id, options) { openSheet(id, options); }
+      /* 从日历行提取该场事件的期次信息，供模式 B 与被点行 100% 对齐：
+         期次优先取事件名括号里的月份（如「ISM 制造业 PMI（11 月）」→「11月」），
+         取不到再按公布日期 MM-DD 推月份；预期/前值直接读该行已渲染的文本
+         （前值格 = T 期实值、预期格 = nextExpected 或 --，由 bindCalPrev 绑定），
+         抽屉三格与日历行同源同字，不存在再算一遍算出另一套数的可能。 */
+      function calEventInfo(row) {
+        var cdEl = row.querySelector("[data-cd]");
+        var iso = cdEl ? cdEl.dataset.cd : null;
+        var timeEl = row.querySelector(".c-time");
+        var rawTime = timeEl ? timeEl.textContent.replace(/\s+/g, " ").replace(/周[一二三四五六日天]\s*$/, "").trim() : "";
+        var evEl = row.querySelector(".c-ev");
+        var evText = evEl ? evEl.textContent : "";
+        var periodLabel = "";
+        var pm = evText.match(/[（(]\s*(\d{1,2})\s*月\s*[）)]/);
+        if (pm) periodLabel = parseInt(pm[1], 10) + "月";
+        if (!periodLabel) {
+          var dm = rawTime.match(/^(\d{1,2})-\d{1,2}/);
+          if (dm) periodLabel = parseInt(dm[1], 10) + "月";
+        }
+        if (!periodLabel) {
+          var mm2 = rawTime.match(/(\d{1,2})\s*月/);
+          if (mm2) periodLabel = parseInt(mm2[1], 10) + "月";
+        }
+        var vvs = row.querySelectorAll(".cal-vals .cal-vv");
+        return {
+          periodLabel: periodLabel,
+          releaseText: rawTime,
+          releaseISO: iso,
+          prevText: vvs.length > 0 ? vvs[0].textContent.trim() : "",
+          expectedText: vvs.length > 1 ? vvs[1].textContent.trim() : ""
+        };
+      }
+      /* 日历行是否还是「待公布」：有固定公布时刻且已过点 → 已公布（模式 C 走 A）；
+         未过点、或无固定日期（日期未定）→ 待公布（模式 B） */
+      function calRowIsUpcoming(row) {
+        var cdEl = row.querySelector("[data-cd]");
+        if (!cdEl) return true;
+        var t = new Date(cdEl.dataset.cd).getTime();
+        return !(isFinite(t) && t <= Date.now());
+      }
       function cardByTarget(id) {
         for (var i = 0; i < CARDS.length; i++) { if (cardIdOf(CARDS[i]) === id) return CARDS[i]; }
         if (id === "card-ffr") return RATE_CARD;
@@ -1681,20 +1730,63 @@
         }
         return base + "。本次 " + now + "，前值 " + fmtCore(m, m.prev) + metaSq(m) + "，暂无预期，按前值方向定调为" + verdict + "。";
       }
-      function openSheet(id) {
+      /* 模式 B 一句话：讲清指标逻辑 + 上期（T 期）实值与定调作参考 + 本期公布时间与实时倒计时。
+         倒计时用 data-cd span 承载，全局 tick() 每秒原地刷新，与日历行同一时钟。 */
+      function sheetExplainUpcoming(c, m, st, ev) {
+        var base = c.explain.replace(/ · FRED 无此序列$/, "");
+        var s = base + "。";
+        if (m) {
+          s += "上期实值 " + fmtCore(m, m.value) + metaSq(m);
+          if (st) s += '，上期定调为<span class="sheet-verdict" style="white-space: nowrap;">「' + st.label + "」</span>";
+          s += "。";
+        }
+        if (ev && ev.releaseISO) {
+          s += "本期将于 " + (ev.releaseText || "") + ' 公布，距公布还有 <span class="mono" data-cd="' + ev.releaseISO + '">—</span>。';
+        } else if (ev && ev.releaseText) {
+          s += "本期公布时间：" + ev.releaseText + "。";
+        }
+        return s;
+      }
+      function openSheet(id, options) {
         var c = cardByTarget(id);
         if (!c || !sheetEl) return;
         var key = metaOf(c);
         var m = META[key];
         var st = m ? dynStatus(m) : null;
-        var badge = st ? badgeSpan(st) : ('<span class="badge ' + c.badge[0] + '">' + c.badge[1] + "</span>");
-        var html = '<div class="sheet-head"><div class="sheet-title">' + c.name + '<span class="period">' + c.period + "</span></div>" + badge + "</div>";
-        html += '<div class="sheet-big mono">' + (m ? fmtCore(m, m.value) : c.big) + (c.unit ? '<span class="unit">' + c.unit + "</span>" : "") + "</div>";
-        if (m) {
-          html += '<div class="sheet-compare">' +
-            '<div class="sc"><div class="l">预期</div><div class="v mono">' + (m.expected !== null && m.expected !== undefined ? fmtCore(m, m.expected) + metaCp(m) : "暂无预期") + "</div></div>" +
-            '<div class="sc"><div class="l">前值</div><div class="v mono">' + fmtCore(m, m.prev) + metaCp(m) + "</div></div>" +
-            '<div class="sc"><div class="l">同比</div><div class="v mono">' + (m.yoy !== null && m.yoy !== undefined ? (m.yoy > 0 ? "+" : "") + m.yoy.toFixed(2) + "%" : "—") + "</div></div></div>";
+        var upcoming = !!(options && options.mode === "upcoming");
+        var ev = upcoming ? (options.event || {}) : null;
+        var html, badge;
+        if (upcoming) {
+          /* ===== 模式 B：T+1 期待公布。标题用日历期次 + 灰色「待公布」标签；
+             大字只写「待公布」+ 公布时间，绝不把 T 期实值当成本期大字 ===== */
+          badge = '<span class="badge gray">待公布</span>';
+          var periodTxt = ev.periodLabel ? ev.periodLabel + " · 待公布" : "待公布";
+          html = '<div class="sheet-head"><div class="sheet-title">' + c.name + '<span class="period">' + periodTxt + "</span></div>" + badge + "</div>";
+          html += '<div class="sheet-big">待公布' + (ev.releaseText ? '<span class="unit">' + ev.releaseText + " 公布</span>" : "") + "</div>";
+          if (m) {
+            /* 三格与被点的日历行严格一致：预期 = 该行预期格（nextExpected，无则 --）；
+               前值（上期）= 该行前值格（T 期最新实值，不再退成 T-1）；
+               上期定调 = T 期利多/利空定调，无定调时退回 T 期同比 */
+            var expTxt = ev.expectedText ? ev.expectedText : ((m.nextExpected !== null && m.nextExpected !== undefined) ? fmtCore(m, m.nextExpected) + (m.cal || "") : "--");
+            var prevTxt = ev.prevText ? ev.prevText : (fmtCore(m, m.value) + (m.cal || ""));
+            var lastTxt = st ? st.label : ((m.yoy !== null && m.yoy !== undefined) ? "同比 " + (m.yoy > 0 ? "+" : "") + m.yoy.toFixed(2) + "%" : "—");
+            html += '<div class="sheet-compare">' +
+              '<div class="sc"><div class="l">预期</div><div class="v mono">' + expTxt + "</div></div>" +
+              '<div class="sc"><div class="l">前值（上期）</div><div class="v mono">' + prevTxt + "</div></div>" +
+              '<div class="sc"><div class="l">上期定调</div><div class="v mono">' + lastTxt + "</div></div></div>";
+          }
+        } else {
+          /* ===== 模式 A（含模式 C）：T 期已公布。标题用已公布月份 + 利多/利空标签；
+             大字 = T 期实值；三格 = T 期预期 expected / T-1 前值 / T 期同比 ===== */
+          badge = st ? badgeSpan(st) : ('<span class="badge ' + c.badge[0] + '">' + c.badge[1] + "</span>");
+          html = '<div class="sheet-head"><div class="sheet-title">' + c.name + '<span class="period">' + c.period + "</span></div>" + badge + "</div>";
+          html += '<div class="sheet-big mono">' + (m ? fmtCore(m, m.value) : c.big) + (c.unit ? '<span class="unit">' + c.unit + "</span>" : "") + "</div>";
+          if (m) {
+            html += '<div class="sheet-compare">' +
+              '<div class="sc"><div class="l">预期</div><div class="v mono">' + (m.expected !== null && m.expected !== undefined ? fmtCore(m, m.expected) + metaCp(m) : "暂无预期") + "</div></div>" +
+              '<div class="sc"><div class="l">前值</div><div class="v mono">' + fmtCore(m, m.prev) + metaCp(m) + "</div></div>" +
+              '<div class="sc"><div class="l">同比</div><div class="v mono">' + (m.yoy !== null && m.yoy !== undefined ? (m.yoy > 0 ? "+" : "") + m.yoy.toFixed(2) + "%" : "—") + "</div></div></div>";
+          }
         }
         /* 内容顺序：头部 → 大数字 → 对比栏 → 走势图 → 一句话解读 → 往期数据。
            解读必须排在往期数据之前，半屏高度才能精准卡在解读结束处、
@@ -1717,7 +1809,9 @@
         } else {
           html += '<div class="no-chart">暂无走势数据（ISM 官方发布，无公开历史序列）</div>';
         }
-        html += '<p class="sheet-explain">' + sheetExplain(c, m, st) + "</p>";
+        /* 走势图与往期数据两种模式共用（历史曲线最新点仍停在 T 期实值）；
+           只有一句话解读按模式切换：A 讲 T 期定调，B 讲逻辑 + 上期参考 + 本期倒计时 */
+        html += '<p class="sheet-explain">' + (upcoming ? sheetExplainUpcoming(c, m, st, ev) : sheetExplain(c, m, st)) + "</p>";
         html += histHtml;
         /* 每次打开默认重置为半屏态，高度在渲染后按内容实测（见下方 sheetMediumPx） */
         sheetExpanded = false;
@@ -1836,15 +1930,25 @@
         grab.addEventListener("touchend", end);
         grab.addEventListener("touchcancel", end);
       })();
-      /* 概览行 / 日历行点击：事件委托统一打开抽屉（页面滚动位置保持不动） */
+      /* 按入口来源打开抽屉（期次不错位的关键分流）：
+         概览行 → 模式 A；日历行先判该场是否已公布——待公布走模式 B 并把该行
+         期次/预期/前值原样带入，已公布走模式 A（模式 C）。页面滚动位置保持不动。 */
+      function openFromRow(el) {
+        if (!el || !el.dataset.target) return;
+        if (el.closest && el.closest("#panel-calendar") && calRowIsUpcoming(el)) {
+          openBottomSheet(el.dataset.target, { mode: "upcoming", event: calEventInfo(el) });
+        } else {
+          openBottomSheet(el.dataset.target);
+        }
+      }
       document.addEventListener("click", function (e) {
         var el = e.target && e.target.closest ? e.target.closest("[data-goto]") : null;
-        if (el) openSheet(el.dataset.target);
+        if (el) openFromRow(el);
       });
       document.addEventListener("keydown", function (e) {
         if ((e.key === "Enter" || e.key === " ") && e.target && e.target.closest && e.target.closest("[data-goto]")) {
           e.preventDefault();
-          openSheet(e.target.closest("[data-goto]").dataset.target);
+          openFromRow(e.target.closest("[data-goto]"));
         }
       });
 
