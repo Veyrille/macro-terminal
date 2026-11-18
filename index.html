@@ -517,27 +517,27 @@
       .sheet-title { font-size: 17px; font-weight: 700; min-width: 0; }
       .sheet-title .period { font-size: 13px; font-weight: 400; color: var(--ink-3); margin-left: 6px; }
       /* 抽屉顶部标题栏：左关闭按钮 + 中居中标题 + 右状态标签，三列对称网格，
-         中列 1fr 两侧各 52px，标题处于抽屉绝对水平中心 */
+         中列 1fr 两侧各 56px，标题处于抽屉绝对水平中心 */
       .sheet-header-row {
         display: grid;
-        grid-template-columns: 52px 1fr 52px;
+        grid-template-columns: 56px 1fr 56px;
         align-items: center;
         width: 100%;
         padding: 4px 0 12px 0;
         box-sizing: border-box;
       }
-      /* 左列液态玻璃圆形关闭按钮：材质复用顶部导航栏 iOS 26 液态玻璃 */
+      /* 左列关闭按钮：苹果天气规格 40px 微透冷灰玻璃透镜 + 顶部高光环 */
       .sheet-close-btn {
         justify-self: start;
-        width: 32px; height: 32px; min-height: 32px;
+        width: 40px; height: 40px; min-height: 40px;
         border-radius: 999px;
         display: inline-flex; align-items: center; justify-content: center;
         padding: 0; margin: 0; cursor: pointer; flex-shrink: 0;
-        background: rgba(255, 255, 255, 0.55);
+        background: linear-gradient(180deg, rgba(120, 120, 128, 0.08) 0%, rgba(120, 120, 128, 0.14) 100%);
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
         border: none;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8), 0 2px 10px rgba(0, 0, 0, 0.06);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.90), inset 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
         color: #1C1C1E;
         -webkit-tap-highlight-color: transparent;
       }
@@ -546,11 +546,11 @@
       .sheet-close-btn:focus-visible { outline: 2px solid var(--next-dot); outline-offset: 2px; }
       @media (prefers-color-scheme: dark) {
         .sheet-close-btn {
-          background: rgba(58, 58, 60, 0.65);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.08) 100%);
           backdrop-filter: blur(20px) saturate(180%);
           -webkit-backdrop-filter: blur(20px) saturate(180%);
           border: none;
-          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 2px 10px rgba(0, 0, 0, 0.35);
+          box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.35), inset 0 0 0 0.5px rgba(255, 255, 255, 0.18), 0 4px 12px rgba(0, 0, 0, 0.28);
           color: #FFFFFF;
         }
       }
@@ -565,7 +565,7 @@
       }
       .sheet-header-title .sheet-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
       .sheet-header-title .period { font-size: 13px; font-weight: 400; color: var(--ink-3); white-space: nowrap; flex-shrink: 0; }
-      /* 右列状态标签：靠右对齐，与左列 52px 完全对称平衡 */
+      /* 右列状态标签：靠右对齐，与左列 56px 完全对称平衡 */
       .sheet-header-badge { justify-self: end; display: inline-flex; align-items: center; justify-content: flex-end; min-width: 0; }
       .sheet-big { font-size: 38px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin: 6px 0 12px; }
       .sheet-big .unit { font-size: 14px; font-weight: 500; color: var(--ink-2); margin-left: 4px; }
@@ -1820,7 +1820,7 @@
           /* 标题行只保留指标名 + 期次月份（如「11月」），不再拼「 · 待公布」；
              状态只由右上角灰色小标签表达 */
           var periodTxt = ev.periodLabel ? ev.periodLabel : "";
-          html = '<div class="sheet-header-row"><button type="button" class="sheet-close-btn" aria-label="关闭"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 3 L11 11 M11 3 L3 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><div class="sheet-header-title"><span class="sheet-name">' + c.name + '</span>' + (periodTxt ? '<span class="period">' + periodTxt + "</span>" : "") + '</div><div class="sheet-header-badge">' + badge + "</div></div>";
+          html = '<div class="sheet-header-row"><button type="button" class="sheet-close-btn" aria-label="关闭"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><div class="sheet-header-title"><span class="sheet-name">' + c.name + '</span>' + (periodTxt ? '<span class="period">' + periodTxt + "</span>" : "") + '</div><div class="sheet-header-badge">' + badge + "</div></div>";
           html += '<div class="sheet-big">待公布' + (ev.releaseText ? '<span class="unit">' + ev.releaseText + " 公布</span>" : "") + "</div>";
           if (m) {
             /* 三格与被点的日历行严格一致：预期 = 该行预期格（nextExpected，无则 --）；
@@ -1838,7 +1838,7 @@
           /* ===== 模式 A（含模式 C）：T 期已公布。标题用已公布月份 + 利多/利空标签；
              大字 = T 期实值；三格 = T 期预期 expected / T-1 前值 / T 期同比 ===== */
           badge = st ? badgeSpan(st) : ('<span class="badge ' + c.badge[0] + '">' + c.badge[1] + "</span>");
-          html = '<div class="sheet-header-row"><button type="button" class="sheet-close-btn" aria-label="关闭"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 3 L11 11 M11 3 L3 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><div class="sheet-header-title"><span class="sheet-name">' + c.name + '</span>' + (c.period ? '<span class="period">' + c.period + "</span>" : "") + '</div><div class="sheet-header-badge">' + badge + "</div></div>";
+          html = '<div class="sheet-header-row"><button type="button" class="sheet-close-btn" aria-label="关闭"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 4.5 L13.5 13.5 M13.5 4.5 L4.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><div class="sheet-header-title"><span class="sheet-name">' + c.name + '</span>' + (c.period ? '<span class="period">' + c.period + "</span>" : "") + '</div><div class="sheet-header-badge">' + badge + "</div></div>";
           html += '<div class="sheet-big mono">' + (m ? fmtCore(m, m.value) : c.big) + (c.unit ? '<span class="unit">' + c.unit + "</span>" : "") + "</div>";
           if (m) {
             html += '<div class="sheet-compare">' +
