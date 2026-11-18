@@ -31,6 +31,130 @@ SERIES_CONFIG = {
 }
 
 
+# ============ ForexFactory 财经日历（faireconomy 公开 JSON，无需 Key） ============
+# 每天由 GitHub Actions 随 FRED 一起抓取未来两周的市场预期，写入 macro_data.json 的
+# expectations / future_expectations / future_expectation_details，供前端日历直接展示。
+# 注意：nextweek 文件并非时刻存在（实测会 404），单个接口失败只跳过该源，绝不拖垮整轮更新；
+# 超过两周的远期月份投行尚未发布一致预期，抓不到属正常，前端对应显示 --。
+FF_CALENDAR_URLS = [
+    "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
+    "https://nfs.faireconomy.media/ff_calendar_nextweek.json",
+]
+
+# ForexFactory 事件名 -> 本站指标代码（FRED 代码；ISM 无 FRED 序列，用 ism_mfg / ism_svc）
+FF_TITLE_MAP = {
+    "CPI m/m": "CPIAUCSL",
+    "Core CPI m/m": "CPILFESL",
+    "PCE Price Index m/m": "PCEPI",
+    "Core PCE Price Index m/m": "PCEPILFE",
+    "PPI m/m": "PPIFIS",
+    "Core PPI m/m": "PPIFES",
+    "Non-Farm Employment Change": "PAYEMS",
+    "Average Hourly Earnings m/m": "CES0500000003",
+    "Unemployment Rate": "UNRATE",
+    "Unemployment Claims": "ICSA",
+    "ISM Manufacturing PMI": "ism_mfg",
+    "ISM Services PMI": "ism_svc",
+    "Retail Sales m/m": "RSAFS",
+    "Advance GDP q/q": "A191RL1Q225SBEA",
+    "Prelim GDP q/q": "A191RL1Q225SBEA",
+    "Final GDP q/q": "A191RL1Q225SBEA",
+    "JOLTS Job Openings": "JTSJOL",
+}
+
+# 前端以「万」为展示单位的指标：FF 的 K（千）/ M（百万）需换算成万
+_FF_WAN_CODES = {"PAYEMS", "ICSA", "JTSJOL"}
+
+
+def parse_ff_number(raw, code: str):
+    """把 FF 的 forecast / previous 字符串解析成与前端 META 同口径的数值。
+
+    格式示例：'0.3%' -> 0.3；'54.6' -> 54.6；'198K' -> 19.8（万人）；
+    '182K' -> 18.2（万人）；'7.72M' -> 772.0（万个）。空串 / 非数字返回 None。
+    """
+    if raw is None:
+        return None
+    s = str(raw).strip().replace(",", "")
+    if not s or s in ("-", "--"):
+        return None
+    if s.endswith("%"):
+        s = s[:-1].strip()
+    suffix = ""
+    if s and s[-1].upper() in ("K", "M", "B"):
+        suffix = s[-1].upper()
+        s = s[:-1].strip()
+    try:
+        v = float(s)
+    except ValueError:
+        return None
+    if code in _FF_WAN_CODES:
+        if suffix == "K":
+            v = v / 10.0
+        elif suffix == "M":
+            v = v * 100.0
+        elif suffix == "B":
+            v = v * 100000.0
+        elif code == "JTSJOL" and abs(v) < 100:
+            v = v * 100.0  # 无后缀的 JOLTS 裸数按百万口径（如 7.7 -> 770 万）
+        elif code in ("PAYEMS", "ICSA") and abs(v) > 50:
+            v = v / 10.0  # 无后缀的千人裸数（如 198000 不会出现，198 视为千人)
+        return round(v, 1)
+    return round(v, 2)
+
+
+def fetch_forex_factory_expectations() -> tuple[dict, dict]:
+    """抓本周 + 下周日历，只取 country == 'USD' 且标题命中映射表的事件。
+
+    每个指标只保留「未来 15 天内最早一场未公布」的 forecast（已过去的事件预期已过期，
+    不回填）；返回 (future_expectations 数值表, details 明细表)。
+    """
+    events: list[dict] = []
+    for url in FF_CALENDAR_URLS:
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "MacroTerminalBot/1.0"})
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            if isinstance(payload, list):
+                events.extend(payload)
+                print(f"[OK] ForexFactory {url.rsplit('/', 1)[-1]} -> {len(payload)} events")
+        except Exception as e:
+            print(f"[WARN] ForexFactory fetch failed ({url}): {e}")
+
+    now = datetime.now(timezone.utc)
+    horizon = now + timedelta(days=15)
+    best: dict[str, dict] = {}
+    for ev in events:
+        if not isinstance(ev, dict) or ev.get("country") != "USD":
+            continue
+        code = FF_TITLE_MAP.get(str(ev.get("title") or "").strip())
+        if not code:
+            continue
+        forecast = parse_ff_number(ev.get("forecast"), code)
+        if forecast is None:
+            continue
+        try:
+            when = datetime.fromisoformat(str(ev.get("date")))
+            if when.tzinfo is None:
+                when = when.replace(tzinfo=timezone.utc)
+        except (TypeError, ValueError):
+            continue
+        if when < now or when > horizon:
+            continue  # 已公布过的旧预期 / 超出两周窗口的远期事件都不写入
+        item = {
+            "forecast": forecast,
+            "previous": parse_ff_number(ev.get("previous"), code),
+            "date": ev.get("date"),
+            "title": ev.get("title"),
+            "impact": ev.get("impact"),
+        }
+        if code not in best or str(item["date"]) < str(best[code]["date"]):
+            best[code] = item
+
+    future = {code: item["forecast"] for code, item in best.items()}
+    print(f"[OK] ForexFactory future expectations -> {future}")
+    return future, best
+
+
 def fetch_fred_series(series_id: str, limit: int = 120) -> list[dict]:
     if not FRED_API_KEY:
         raise RuntimeError("Missing FRED_API_KEY environment variable")
@@ -155,13 +279,27 @@ def main():
         "updated_at_bjt": datetime.now(BJT).strftime("%Y-%m-%d %H:%M:%S"),
         "series": {},
         "manual_overrides": {},
+        "expectations": {},
+        "future_expectations": {},
+        "future_expectation_details": {},
     }
 
-    # 读取可选的手动覆写文件（用于存放 ISM PMI、市场预期值与 CME FedWatch 概率）
+    # 读取可选的手动覆写文件（用于存放 ISM PMI、已公布期市场预期与 CME FedWatch 概率）
     overrides_path = os.path.join(os.path.dirname(__file__), "overrides.json")
     if os.path.exists(overrides_path):
         with open(overrides_path, "r", encoding="utf-8") as f:
             output["manual_overrides"] = json.load(f)
+
+    # ForexFactory 未来两周预期：自动抓取的最新一致预期同时写入 expectations 与
+    # future_expectations（同源同值）；前端把它们只用于「未来一期预期」（日历），
+    # 已公布期的 expected 仍由 manual_overrides 提供，两者互不覆盖。
+    try:
+        ff_future, ff_details = fetch_forex_factory_expectations()
+        output["expectations"] = ff_future
+        output["future_expectations"] = ff_future
+        output["future_expectation_details"] = ff_details
+    except Exception as e:
+        print(f"[WARN] ForexFactory expectations failed: {e}")
 
     for sid, cfg in SERIES_CONFIG.items():
         try:
