@@ -179,7 +179,9 @@
         width: 100%; max-width: 520px; margin: 0 auto;
         flex: 1 1 auto; min-width: 0; opacity: 1;
         background: var(--glass-bg); border: none; box-shadow: var(--glass-shadow);
-        backdrop-filter: blur(24px) saturate(190%); -webkit-backdrop-filter: blur(24px) saturate(190%);
+        /* 模糊半径降为 16px：磨砂感几乎不变，GPU 像素着色采样开销减半以上 */
+        backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);
+        will-change: transform;
         /* 独立 GPU 合成层：橡皮筋越界滚动时防止 WebKit 瓦片裁剪掉按钮文字；
            不设 overflow: hidden，滑块本身已严格限制在内框内 */
         transform: scale(1) translateY(0) translateZ(0); -webkit-transform: scale(1) translateY(0) translateZ(0);
@@ -427,10 +429,21 @@
       }
       .cal-month-label:first-child { margin-top: 2px; }
       /* 「下一场」呼吸圆点：标在最近一场未公布事件的行首。
-         16×16 纯 SVG 绘制（中心圆 + SMIL 扩散环，见 markNextEvent），
+         16×16 纯 SVG 绘制（中心圆 + 扩散环，见 markNextEvent），
          不再用 div/span + CSS 圆：SVG 几何不受行内盒基线裁剪与 Flex 纵向挤压影响，
-         上下左右四边 100% 正圆完整；SVG 本体带 overflow: visible，波纹不被自身视口裁切 */
+         上下左右四边 100% 正圆完整；SVG 本体带 overflow: visible，波纹不被自身视口裁切。
+         扩散环动画只用 transform: scale + opacity（纯 GPU 合成线程运行，零主线程开销），
+         严禁再用 SMIL <animate r> 改半径——那属于几何重绘，每帧都要重算路径 */
       .next-pulse-svg { display: block; flex-shrink: 0; }
+      .next-pulse-ring {
+        transform-box: fill-box; transform-origin: center;
+        will-change: transform, opacity;
+        animation: nextPulse 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+      }
+      @keyframes nextPulse {
+        0%   { transform: scale(1);   opacity: 0.75; }
+        100% { transform: scale(2.3); opacity: 0; }
+      }
       .cal-head { display: none; }
       /* 日历行：纵向 padding 12px + 整数 line-height 20px，行高为整数像素；
          横向刻意不对称以平衡竖条占位——左 padding 10px + 竖条 3px + 竖条右边距 7px
@@ -497,19 +510,24 @@
 
       /* ---------- 底部半屏详情抽屉（Bottom Sheet） ---------- */
       .sheet-mask[hidden], .sheet[hidden] { display: none !important; }
-      .sheet-mask { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.32); opacity: 0; transition: opacity 0.32s ease; z-index: 200; }
+      /* 遮罩：纯半透明黑（与苹果原生抽屉一致），不加 backdrop-filter 实时模糊采样，
+         只对 opacity 做过渡，GPU 开销最低 */
+      .sheet-mask { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35); opacity: 0; transition: opacity 0.32s ease; z-index: 200; }
       .sheet-mask.open { opacity: 1; }
+      /* 抽屉高度恒定锁死为最大展开高度（96dvh + 顶部安全区兜底），永不改 height：
+         关闭/半屏/全展三态与跟手拖拽全部只改 transform: translate3d 的 Y 偏移，
+         纯 GPU 合成位移、零 Layout Reflow，走势图与表格不再每帧重排 */
       .sheet {
         position: fixed; left: 0; right: 0; bottom: 0; z-index: 201;
-        max-width: 720px; margin: 0 auto; height: 62vh; height: 62dvh;
+        max-width: 720px; margin: 0 auto; height: 96vh; height: 96dvh;
         max-height: calc(100dvh - env(safe-area-inset-top, 16px));
         background: var(--surface); border-radius: 20px 20px 0 0;
         box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
-        transform: translateY(103%); transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1), height 0.36s cubic-bezier(0.32, 0.72, 0, 1);
+        transform: translate3d(0, 100%, 0);
+        transition: transform 0.36s cubic-bezier(0.32, 0.72, 0, 1);
+        will-change: transform;
         display: flex; flex-direction: column; overflow: hidden;
       }
-      .sheet.open { transform: translateY(0); }
-      .sheet.expanded { height: 96vh; height: 96dvh; max-height: calc(100dvh - env(safe-area-inset-top, 16px)); }
       .sheet-grab, .sheet-handle-zone { height: 36px; min-height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; flex: 0 0 36px; cursor: grab; touch-action: none; }
       .sheet-handle { width: 36px; height: 5px; border-radius: 3px; background: var(--cal-gray); display: block; }
       .sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 6px 20px calc(24px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; }
@@ -534,8 +552,11 @@
         display: inline-flex; align-items: center; justify-content: center;
         padding: 0; margin: 0; cursor: pointer; flex-shrink: 0;
         background: linear-gradient(180deg, rgba(120, 120, 128, 0.08) 0%, rgba(120, 120, 128, 0.14) 100%);
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        /* 模糊半径降为 16px（原 20px）：磨砂感几乎不变，GPU 采样开销明显降低；
+           常驻独立合成层，避免滚动/抽屉动画时反复重采样 */
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        will-change: transform; transform: translate3d(0, 0, 0);
         border: none;
         box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.90), inset 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
         color: #1C1C1E;
@@ -547,8 +568,8 @@
       @media (prefers-color-scheme: dark) {
         .sheet-close-btn {
           background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.08) 100%);
-          backdrop-filter: blur(20px) saturate(180%);
-          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          backdrop-filter: blur(16px) saturate(180%);
+          -webkit-backdrop-filter: blur(16px) saturate(180%);
           border: none;
           box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.35), inset 0 0 0 0.5px rgba(255, 255, 255, 0.18), 0 4px 12px rgba(0, 0, 0, 0.28);
           color: #FFFFFF;
@@ -591,7 +612,6 @@
       }
       /* 定调词组（「利空」/「利多」/「中性」等）整体不拆行 */
       .sheet-verdict { white-space: nowrap; }
-      .foot-note { margin-top: 20px; font-size: 12px; color: var(--ink-3); line-height: 1.7; }
 
       @media (max-width: 1024px) {
         .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
@@ -808,8 +828,6 @@
           <div class="cal-row" data-goto="growth" data-target="card-ism-svc" role="button" tabindex="0"><span class="cal-bar" aria-hidden="true"></span><div class="cal-main"><div class="cal-top"><span class="c-time mono">1 月第三个工作日 23:00</span><span class="c-cd dim">日期未定</span></div><span class="c-ev">ISM 服务业 PMI（12 月）<span class="note">按 ISM 惯例：每月第三个工作日公布</span></span><span class="cal-vals"><span><span class="cal-vl">前值</span> <span class="cal-vv">54.5</span></span><span><span class="cal-vl">预期</span> <span class="cal-vv">--</span></span><span><span class="cal-vl">公布</span> <span class="cal-vv">--</span></span></span></div></div>
         </div>
       </section>
-
-      <div class="foot-note" id="dataUpdated">数据最后更新：2026-11-15 · 内置基准数据</div>
     </div>
     <div class="sheet-mask" id="sheetMask" hidden></div>
     <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="指标详情" hidden>
@@ -1600,8 +1618,6 @@
         }).join('<div class="list-divider" aria-hidden="true"></div>');
         bindCalPrev();
         updateCME();
-        var fu = document.getElementById("dataUpdated");
-        if (fu) fu.textContent = "数据最后更新：" + DATA_UPDATED + (LIVE_ON ? " · 来源 " + (LIVE_SOURCE ? LIVE_SOURCE + " macro_data.json" : "macro_data.json") : " · 内置基准数据（2026-11-15）");
         if (typeof tick === "function") tick();
       }
       renderAll();
@@ -1720,8 +1736,11 @@
       var sheetOpenState = false;
       var isSheetOpen = false;
       var sheetExpanded = false;
-      /* 半屏态精确像素高度：每次打开按内容实测（卡在往期数据标题上方），拖拽吸附共用 */
+      /* 半屏态精确像素高度（可见高度）：每次打开按内容实测（卡在往期数据标题上方），拖拽吸附共用 */
       var sheetMediumPx = 0;
+      /* 抽屉当前 translate3d 的 Y 偏移（px）：抽屉高度恒定 96dvh，露出多少全靠这个偏移——
+         0 = 全展，sheetH - sheetMediumPx = 半屏，sheetH = 关闭。打开/关闭/拖拽三处统一维护 */
+      var sheetOffsetY = 0;
       /* openBottomSheet(id, options)：打开抽屉的唯一入口，按点击来源分模式渲染——
          模式 A（默认，无 options）：概览/各 Tab 点开，展示 T 期已公布数据；
          模式 B（options = { mode: "upcoming", event }）：日历点「待公布」行，展示 T+1 期预告；
@@ -1872,12 +1891,13 @@
            只有一句话解读按模式切换：A 讲 T 期定调，B 讲逻辑 + 上期参考 + 本期倒计时 */
         html += '<p class="sheet-explain">' + (upcoming ? sheetExplainUpcoming(c, m, st, ev) : sheetExplain(c, m, st)) + "</p>";
         html += histHtml;
-        /* 每次打开默认重置为半屏态，高度在渲染后按内容实测（见下方 sheetMediumPx） */
+        /* 每次打开默认重置为半屏态：抽屉高度恒定 96dvh 不动，先无过渡地归位到
+           完全关闭的偏移（translate3d(0, 100%, 0)），渲染内容后实测半屏可见高度，
+           再只过渡 transform 滑到半屏偏移，全程零重排 */
         sheetExpanded = false;
         sheetEl.classList.remove("expanded");
-        sheetEl.style.height = "";
-        sheetEl.style.transform = "";
-        sheetEl.style.transition = "";
+        sheetEl.style.transition = "none";
+        sheetEl.style.transform = "translate3d(0, 100%, 0)";
         sheetBody.innerHTML = html;
         sheetBody.scrollTop = 0;
         requestAnimationFrame(function () { sheetBody.scrollTop = 0; });
@@ -1889,21 +1909,29 @@
         sheetMask.hidden = false;
         sheetEl.hidden = false;
         void sheetEl.offsetWidth;
-        /* 动态计算半屏精确高度：抽屉高度 = 抓手栏顶部到「往期数据」标题的距离 - 8px，
+        /* 动态计算半屏精确可见高度：= 抓手栏顶部到「往期数据」标题的距离 - 8px，
            即完整展示大数字 + 对比栏 + 走势图 + 一句话解读，并留出约 20px 底部留白
            （解读与往期标题之间有 28px 间距，扣掉 8px 后正好剩 20px），
            往期标题一丝都不露；上限 64dvh。无往期区块（ISM）时按内容总高计算。
-           抽屉此时带 translateY(103%) 位移，但标题与抽屉顶的相对距离不受位移影响。 */
+           抽屉此时带 100% 位移，但标题与抽屉顶的相对距离不受位移影响。 */
+        var sheetH = sheetEl.getBoundingClientRect().height;
         var maxMediumPx = Math.round(window.innerHeight * 0.64);
         var histTitleEl = sheetBody.querySelector(".sheet-hist-title");
         if (histTitleEl) {
           sheetMediumPx = Math.round(histTitleEl.getBoundingClientRect().top - sheetEl.getBoundingClientRect().top - 8);
         } else {
-          sheetMediumPx = 36 + sheetBody.scrollHeight;
+          /* 无往期区块（ISM）：按内容实际底边测高。不能用 sheetBody.scrollHeight——
+             抽屉已是 96dvh 满高，scrollHeight 会被 body 本身高度顶满而误判成全屏 */
+          var lastEl = sheetBody.lastElementChild;
+          sheetMediumPx = lastEl ? Math.round(lastEl.getBoundingClientRect().bottom - sheetEl.getBoundingClientRect().top + 24) : Math.round(window.innerHeight * 0.62);
         }
         if (!(sheetMediumPx >= 200)) sheetMediumPx = Math.round(window.innerHeight * 0.62);
         if (sheetMediumPx > maxMediumPx) sheetMediumPx = maxMediumPx;
-        sheetEl.style.height = sheetMediumPx + "px";
+        if (sheetMediumPx > sheetH) sheetMediumPx = sheetH;
+        /* 半屏偏移 = 抽屉总高 - 可见高度；恢复 CSS 的 transform 过渡后滑入 */
+        sheetOffsetY = Math.max(0, sheetH - sheetMediumPx);
+        sheetEl.style.transition = "";
+        sheetEl.style.transform = "translate3d(0, " + sheetOffsetY + "px, 0)";
         sheetMask.classList.add("open");
         sheetEl.classList.add("open");
         sheetOpenState = true;
@@ -1916,8 +1944,10 @@
         isSheetOpen = false;
         sheetExpanded = false;
         sheetEl.classList.remove("expanded");
-        sheetEl.style.height = "";
+        /* 关闭同样只走 transform：恢复 CSS 过渡后滑到完全关闭的偏移，高度永不改动 */
         sheetEl.style.transition = "";
+        sheetOffsetY = sheetEl.getBoundingClientRect().height;
+        sheetEl.style.transform = "translate3d(0, 100%, 0)";
         sheetMask.classList.remove("open");
         sheetEl.classList.remove("open");
         document.body.style.overflow = "";
@@ -1932,23 +1962,37 @@
       if (sheetMask) sheetMask.addEventListener("click", closeSheet);
       document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
       /* 小灰条跟手拖拽（.sheet-handle-zone 36px 热区，touch-action:none）：只有两级吸附高度。
-         touchstart：记录 startY 与当前高度 startHeight，立刻关掉高度过渡，拖动才不发粘；
-         touchmove：preventDefault 后按 newHeight = startHeight + (startY - currentY) 实时
-           写 height，抽屉上沿 1:1 贴着手指走；超过 96dvh 上限的部分施加 0.25 倍橡皮筋阻尼；
-         touchend：恢复苹果弹簧过渡，按拖动幅度/松手高度吸附——半屏上拉 >40px（或过两档
-           中点）→ 96dvh 大屏；大屏下拉 >40px → 回半屏；半屏下拉 >65px → 关闭；
+         全程只改 transform: translate3d 的 Y 偏移，严禁动画化 height——抽屉高度恒定 96dvh，
+         偏移 0 = 全展、sheetH - sheetMediumPx = 半屏、sheetH = 关闭，纯 GPU 位移零重排。
+         touchstart：记录 startY 与当前偏移 startOffset，立刻关掉 transform 过渡，拖动才不发粘；
+         touchmove：preventDefault 后算出目标偏移，写入统一走 requestAnimationFrame 合并，
+           一帧内多次 touchmove 只赋值一次；越过全展（偏移 < 0）的部分施加 0.25 倍橡皮筋阻尼；
+         touchend：恢复 CSS 的 transform 弹簧过渡，按拖动幅度/松手位置吸附——半屏上拉 >40px
+           （或越过两档中点）→ 全展；大屏下拉 >40px → 回半屏；半屏下拉 >65px → 关闭；
            幅度不足阈值则弹回松手前那一档。 */
       (function () {
         var grab = document.getElementById("sheetGrab");
         if (!grab || !sheetEl) return;
-        var startY = null, startHeight = 0, curHeight = 0, wasExpanded = false;
-        function expandedPx() { return Math.round(window.innerHeight * 0.96); }
-        function mediumPx() { return sheetMediumPx > 0 ? sheetMediumPx : Math.round(window.innerHeight * 0.62); }
+        var startY = null, startOffset = 0, curOffset = 0, wasExpanded = false;
+        var dragRafId = 0, pendingOffset = null;
+        function sheetH() { return sheetEl.getBoundingClientRect().height; }
+        function mediumOffsetPx() {
+          var m = sheetMediumPx > 0 ? sheetMediumPx : Math.round(window.innerHeight * 0.62);
+          return Math.max(0, sheetH() - m);
+        }
+        function applyDragFrame() {
+          dragRafId = 0;
+          if (pendingOffset === null) return;
+          curOffset = pendingOffset;
+          pendingOffset = null;
+          sheetOffsetY = curOffset;
+          sheetEl.style.transform = "translate3d(0, " + curOffset + "px, 0)";
+        }
         grab.addEventListener("touchstart", function (e) {
           if (!e.touches || !e.touches.length) return;
           startY = e.touches[0].clientY;
-          startHeight = sheetEl.getBoundingClientRect().height;
-          curHeight = startHeight;
+          startOffset = sheetOffsetY;
+          curOffset = startOffset;
           wasExpanded = sheetExpanded;
           sheetEl.style.transition = "none";
         }, { passive: true });
@@ -1956,38 +2000,42 @@
           if (startY === null || !e.touches || !e.touches.length) return;
           e.preventDefault();
           var currentY = e.touches[0].clientY;
-          var newHeight = startHeight + (startY - currentY);
-          var maxH = expandedPx();
-          if (newHeight > maxH) newHeight = maxH + (newHeight - maxH) * 0.25;
-          if (newHeight < 72) newHeight = 72;
-          curHeight = newHeight;
-          sheetEl.style.height = newHeight + "px";
+          var newOffset = startOffset + (currentY - startY);
+          var maxOffset = sheetH() - 72; /* 至少露出 72px，不拖到全关以下 */
+          if (newOffset < 0) newOffset = newOffset * 0.25; /* 越过全展的橡皮筋阻尼 */
+          if (newOffset > maxOffset) newOffset = maxOffset;
+          pendingOffset = newOffset;
+          if (!dragRafId) dragRafId = requestAnimationFrame(applyDragFrame);
         }, { passive: false });
+        function snapTo(offset, expanded) {
+          sheetExpanded = expanded;
+          sheetEl.classList.toggle("expanded", expanded);
+          sheetOffsetY = offset;
+          sheetEl.style.transform = "translate3d(0, " + offset + "px, 0)";
+        }
         function end() {
           if (startY === null) return;
           startY = null;
-          var up = curHeight - startHeight; /* >0 上拉，<0 下拉 */
-          var midPx = (mediumPx() + expandedPx()) / 2;
-          sheetEl.style.transition = "height 0.36s cubic-bezier(0.32, 0.72, 0, 1), transform 0.38s cubic-bezier(0.32, 0.72, 0, 1)";
-          if (!wasExpanded && up < -65) {
-            /* 半屏下拉超过 65px：直接关闭（先清掉内联高度/过渡，关闭滑出走 CSS 原过渡） */
-            sheetEl.style.transition = "";
-            sheetEl.style.height = "";
+          /* 松手先把待执行的拖拽帧同步落定，再按最终位置判定吸附 */
+          if (dragRafId) { cancelAnimationFrame(dragRafId); dragRafId = 0; }
+          if (pendingOffset !== null) { curOffset = pendingOffset; pendingOffset = null; }
+          var moved = curOffset - startOffset; /* >0 下拉，<0 上拉 */
+          var medOff = mediumOffsetPx();
+          var midOff = medOff / 2; /* 两档中点（全展 0 与半屏 medOff 之间） */
+          sheetEl.style.transition = "";
+          if (!wasExpanded && moved > 65) {
+            /* 半屏下拉超过 65px：直接关闭（关闭滑出走 CSS transform 过渡） */
             closeSheet();
             return;
           }
-          if (!wasExpanded && (up > 40 || curHeight > midPx)) {
-            sheetExpanded = true;
-            sheetEl.classList.add("expanded");
-            sheetEl.style.height = expandedPx() + "px";
-          } else if (wasExpanded && up < -40) {
-            sheetExpanded = false;
-            sheetEl.classList.remove("expanded");
-            sheetEl.style.height = mediumPx() + "px";
+          if (!wasExpanded && (moved < -40 || curOffset < midOff)) {
+            snapTo(0, true);
+          } else if (wasExpanded && moved > 40) {
+            snapTo(medOff, false);
           } else if (wasExpanded) {
-            sheetEl.style.height = expandedPx() + "px";
+            snapTo(0, true);
           } else {
-            sheetEl.style.height = mediumPx() + "px";
+            snapTo(medOff, false);
           }
         }
         grab.addEventListener("touchend", end);
@@ -2018,7 +2066,11 @@
       /* ============ 顶部导航栏仿 Instagram 动态缩放：上滑缩小、下滑恢复 ============
          6px 阈值过滤微小抖动；scrollY <= 0 与滚到底部的橡皮筋越界区间不参与判断 */
       var lastScrollY = window.scrollY;
-      window.addEventListener("scroll", function () {
+      /* scroll 只置脏标记，真正的判断与 DOM 写入合并进 requestAnimationFrame
+         （ticking 锁）：一帧内多次 scroll 事件只跑一次，避免滚动时频繁读写阻塞主线程 */
+      var scrollTicking = false;
+      function handleScrollFrame() {
+        scrollTicking = false;
         /* 切换 Tab / 跳转卡片期间的程序化滚动不参与缩放判断，只同步基准位置 */
         if (isSwitchingTabScroll) { lastScrollY = window.scrollY; return; }
         var y = window.scrollY;
@@ -2034,6 +2086,11 @@
           glassNav.classList.remove("nav-shrunk");
         }
         if (y > lastScrollY + 6 || y < lastScrollY - 6 || y <= 40) lastScrollY = y;
+      }
+      window.addEventListener("scroll", function () {
+        if (scrollTicking) return;
+        scrollTicking = true;
+        requestAnimationFrame(handleScrollFrame);
       }, { passive: true });
 
       /* ============ 深 / 浅色：完全跟随系统，无手动切换 ============ */
@@ -2089,8 +2146,10 @@
           found.classList.add("next-up");
           var t = found.querySelector(".c-time");
           if (t && !t.querySelector(".next-pulse-svg")) {
-            /* 16×16 纯 SVG 呼吸点：外圈 SMIL 扩散环（r 3→7、透明度 0.8→0，1.8s 循环）
-               + 中心实心圆 r=3 #007AFF；SVG 几何不被 CSS 盒模型压扁或裁底边 */
+            /* 16×16 纯 SVG 呼吸点：外圈扩散环 + 中心实心圆 r=3 #007AFF；
+               SVG 几何不被 CSS 盒模型压扁或裁底边。扩散环动画走纯 CSS @keyframes
+               nextPulse（只动 transform: scale 1→2.3 与 opacity，GPU 合成线程独立运行），
+               不再用 SMIL <animate r> 改半径——几何重绘每帧占用主线程 */
             var SVGNS = "http://www.w3.org/2000/svg";
             var svg = document.createElementNS(SVGNS, "svg");
             svg.setAttribute("width", "16");
@@ -2104,18 +2163,7 @@
             ring.setAttribute("cy", "8");
             ring.setAttribute("r", "3");
             ring.setAttribute("fill", "rgba(0, 122, 255, 0.45)");
-            var animR = document.createElementNS(SVGNS, "animate");
-            animR.setAttribute("attributeName", "r");
-            animR.setAttribute("values", "3;7");
-            animR.setAttribute("dur", "1.8s");
-            animR.setAttribute("repeatCount", "indefinite");
-            var animO = document.createElementNS(SVGNS, "animate");
-            animO.setAttribute("attributeName", "opacity");
-            animO.setAttribute("values", "0.8;0");
-            animO.setAttribute("dur", "1.8s");
-            animO.setAttribute("repeatCount", "indefinite");
-            ring.appendChild(animR);
-            ring.appendChild(animO);
+            ring.setAttribute("class", "next-pulse-ring");
             var core = document.createElementNS(SVGNS, "circle");
             core.setAttribute("cx", "8");
             core.setAttribute("cy", "8");
@@ -2251,17 +2299,15 @@
         if (typeof sheetOpenState !== "undefined" && sheetOpenState === true) return true;
         return !!(e && e.target && e.target.closest && e.target.closest(".sheet, .sheet-mask, .bottom-sheet, .sheet-overlay"));
       }
-      document.addEventListener("touchstart", function (e) {
-        if (ptrBlockedBySheet(e)) { ptrStartY = null; ptrDist = 0; return; }
-        if (ptrBusy) return;
-        ptrStartY = (window.scrollY <= 0 && e.touches.length === 1) ? e.touches[0].clientY : null;
-        ptrDist = 0;
-      }, { passive: true });
-      document.addEventListener("touchmove", function (e) {
-        if (ptrBlockedBySheet(e)) { ptrStartY = null; ptrDist = 0; return; }
+      /* 下拉位移的 DOM 写入统一走 requestAnimationFrame 合并：touchmove 只记最新 dy，
+         每帧最多赋值一次 transform，避免一帧内重复写样式阻塞主线程 */
+      var ptrRafId = 0, ptrPendingDy = null;
+      function applyPtrFrame() {
+        ptrRafId = 0;
+        if (ptrPendingDy === null) return;
+        var dy = ptrPendingDy;
+        ptrPendingDy = null;
         if (ptrBusy || ptrStartY === null) return;
-        if (window.scrollY > 0) { ptrStartY = null; return; }
-        var dy = e.touches[0].clientY - ptrStartY;
         if (dy <= 0) {
           if (ptrDist > 0) {
             ptrDist = 0;
@@ -2271,16 +2317,36 @@
           }
           return;
         }
-        e.preventDefault();
         /* 阶段一：橡皮筋阻尼拉伸 */
         ptrDist = Math.min(dy * 0.42, 88);
         wrapEl.style.transition = "none";
         wrapEl.style.transform = "translate3d(0, " + ptrDist + "px, 0)";
         ptrShow(ptrDist);
+      }
+      function flushPtrFrame() {
+        if (ptrRafId) { cancelAnimationFrame(ptrRafId); ptrRafId = 0; }
+        if (ptrPendingDy !== null) applyPtrFrame();
+      }
+      document.addEventListener("touchstart", function (e) {
+        if (ptrBlockedBySheet(e)) { ptrStartY = null; ptrDist = 0; return; }
+        if (ptrBusy) return;
+        ptrStartY = (window.scrollY <= 0 && e.touches.length === 1) ? e.touches[0].clientY : null;
+        ptrDist = 0;
+      }, { passive: true });
+      document.addEventListener("touchmove", function (e) {
+        if (ptrBlockedBySheet(e)) { ptrStartY = null; ptrDist = 0; ptrPendingDy = null; return; }
+        if (ptrBusy || ptrStartY === null) return;
+        if (window.scrollY > 0) { ptrStartY = null; return; }
+        var dy = e.touches[0].clientY - ptrStartY;
+        if (dy > 0) e.preventDefault();
+        ptrPendingDy = dy;
+        if (!ptrRafId) ptrRafId = requestAnimationFrame(applyPtrFrame);
       }, { passive: false });
       function ptrRelease(e) {
         if (ptrBlockedBySheet(e)) { ptrStartY = null; ptrDist = 0; return; }
         if (ptrBusy || ptrStartY === null) return;
+        /* 松手前先把待执行的下拉帧同步落定，保证阈值判定用的是手指最终位置 */
+        flushPtrFrame();
         ptrStartY = null;
         if (ptrDist >= 52) ptrRefresh();
         else if (ptrDist > 0) { ptrBusy = true; ptrBounceHome(); }
