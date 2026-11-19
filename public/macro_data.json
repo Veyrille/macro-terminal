@@ -1,5 +1,5 @@
 {
-  "updated_at_bjt": "2026-11-19 13:04:19",
+  "updated_at_bjt": "2026-11-20 05:44:11",
   "series": {
     "CPIAUCSL": {
       "date": "2026-10-01",
@@ -953,9 +953,9 @@
       "name": "平均时薪"
     },
     "ICSA": {
-      "date": "2026-11-07",
-      "latest": 20.0,
-      "prev": 19.1,
+      "date": "2026-11-14",
+      "latest": 20.3,
+      "prev": 20.2,
       "history": [
         {
           "date": "2024-12-28",
@@ -1050,8 +1050,8 @@
           "value": 19.1
         },
         {
-          "date": "2026-11-07",
-          "value": 20.0
+          "date": "2026-11-14",
+          "value": 20.3
         }
       ],
       "name": "初请失业金人数"
@@ -1307,7 +1307,7 @@
       "name": "零售销售"
     },
     "DFEDTARU": {
-      "date": "2026-11-18",
+      "date": "2026-11-19",
       "latest": 4.0,
       "prev": 4.0,
       "history": [
@@ -1404,14 +1404,14 @@
           "value": 4.0
         },
         {
-          "date": "2026-11-18",
+          "date": "2026-11-19",
           "value": 4.0
         }
       ],
       "name": "联邦基金利率上限"
     },
     "DFEDTARL": {
-      "date": "2026-11-18",
+      "date": "2026-11-19",
       "latest": 3.75,
       "prev": 3.75,
       "history": [
@@ -1508,16 +1508,16 @@
           "value": 3.75
         },
         {
-          "date": "2026-11-18",
+          "date": "2026-11-19",
           "value": 3.75
         }
       ],
       "name": "联邦基金利率下限"
     },
     "DGS2": {
-      "date": "2026-11-17",
+      "date": "2026-11-18",
       "latest": 4.8,
-      "prev": 4.83,
+      "prev": 4.8,
       "history": [
         {
           "date": "2024-12-31",
@@ -1612,16 +1612,16 @@
           "value": 4.56
         },
         {
-          "date": "2026-11-17",
+          "date": "2026-11-18",
           "value": 4.8
         }
       ],
       "name": "2 年期美债收益率"
     },
     "DGS10": {
-      "date": "2026-11-17",
-      "latest": 5.1,
-      "prev": 5.12,
+      "date": "2026-11-18",
+      "latest": 5.07,
+      "prev": 5.1,
       "history": [
         {
           "date": "2024-12-31",
@@ -1716,8 +1716,8 @@
           "value": 4.94
         },
         {
-          "date": "2026-11-17",
-          "value": 5.1
+          "date": "2026-11-18",
+          "value": 5.07
         }
       ],
       "name": "10 年期美债收益率"
@@ -1873,21 +1873,9 @@
       ]
     }
   },
-  "expectations": {
-    "ICSA": 19.8
-  },
-  "future_expectations": {
-    "ICSA": 19.8
-  },
-  "future_expectation_details": {
-    "ICSA": {
-      "forecast": 19.8,
-      "previous": 20.0,
-      "date": "2026-11-19T08:30:00-05:00",
-      "title": "Unemployment Claims",
-      "impact": "Medium"
-    }
-  },
+  "expectations": {},
+  "future_expectations": {},
+  "future_expectation_details": {},
   "actuals": {
     "CPIAUCSL": 0.35,
     "CPILFESL": 0.3,
@@ -1898,12 +1886,12 @@
     "PAYEMS": 16.5,
     "UNRATE": 4.1,
     "CES0500000003": 0.37,
-    "ICSA": 20.0,
+    "ICSA": 20.3,
     "JTSJOL": 752.3,
     "A191RL1Q225SBEA": 3.4,
     "RSAFS": 0.21,
     "DGS2": 4.8,
-    "DGS10": 5.1,
+    "DGS10": 5.07,
     "DTWEXBGS": 122.65
   },
   "actual_details": {
@@ -1971,10 +1959,10 @@
       "source": "fred"
     },
     "ICSA": {
-      "actual": 20.0,
+      "actual": 20.3,
       "forecast": null,
       "previous": null,
-      "date": "2026-11-07",
+      "date": "2026-11-14",
       "source": "fred"
     },
     "JTSJOL": {
@@ -2002,14 +1990,14 @@
       "actual": 4.8,
       "forecast": null,
       "previous": null,
-      "date": "2026-11-17",
+      "date": "2026-11-18",
       "source": "fred"
     },
     "DGS10": {
-      "actual": 5.1,
+      "actual": 5.07,
       "forecast": null,
       "previous": null,
-      "date": "2026-11-17",
+      "date": "2026-11-18",
       "source": "fred"
     },
     "DTWEXBGS": {
@@ -2030,12 +2018,12 @@
     "PAYEMS": 16.5,
     "UNRATE": 4.1,
     "CES0500000003": 0.37,
-    "ICSA": 20.0,
+    "ICSA": 20.3,
     "JTSJOL": 752.3,
     "A191RL1Q225SBEA": 3.4,
     "RSAFS": 0.21,
     "DGS2": 4.8,
-    "DGS10": 5.1,
+    "DGS10": 5.07,
     "DTWEXBGS": 122.65
   }
 }
