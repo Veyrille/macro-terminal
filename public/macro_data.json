@@ -1,5 +1,5 @@
 {
-  "updated_at_bjt": "2026-11-23 12:46:51",
+  "updated_at_bjt": "2026-11-24 09:08:28",
   "series": {
     "CPIAUCSL": {
       "date": "2026-10-01",
@@ -1307,7 +1307,7 @@
       "name": "零售销售"
     },
     "DFEDTARU": {
-      "date": "2026-11-22",
+      "date": "2026-11-23",
       "latest": 4.0,
       "prev": 4.0,
       "history": [
@@ -1404,14 +1404,14 @@
           "value": 4.0
         },
         {
-          "date": "2026-11-22",
+          "date": "2026-11-23",
           "value": 4.0
         }
       ],
       "name": "联邦基金利率上限"
     },
     "DFEDTARL": {
-      "date": "2026-11-22",
+      "date": "2026-11-23",
       "latest": 3.75,
       "prev": 3.75,
       "history": [
@@ -1508,16 +1508,16 @@
           "value": 3.75
         },
         {
-          "date": "2026-11-22",
+          "date": "2026-11-23",
           "value": 3.75
         }
       ],
       "name": "联邦基金利率下限"
     },
     "DGS2": {
-      "date": "2026-11-19",
-      "latest": 4.76,
-      "prev": 4.8,
+      "date": "2026-11-20",
+      "latest": 4.63,
+      "prev": 4.76,
       "history": [
         {
           "date": "2024-12-31",
@@ -1612,16 +1612,16 @@
           "value": 4.56
         },
         {
-          "date": "2026-11-19",
-          "value": 4.76
+          "date": "2026-11-20",
+          "value": 4.63
         }
       ],
       "name": "2 年期美债收益率"
     },
     "DGS10": {
-      "date": "2026-11-19",
-      "latest": 5.04,
-      "prev": 5.07,
+      "date": "2026-11-20",
+      "latest": 4.92,
+      "prev": 5.04,
       "history": [
         {
           "date": "2024-12-31",
@@ -1716,16 +1716,16 @@
           "value": 4.94
         },
         {
-          "date": "2026-11-19",
-          "value": 5.04
+          "date": "2026-11-20",
+          "value": 4.92
         }
       ],
       "name": "10 年期美债收益率"
     },
     "DTWEXBGS": {
-      "date": "2026-11-13",
-      "latest": 122.65,
-      "prev": 122.54,
+      "date": "2026-11-20",
+      "latest": 123.6,
+      "prev": 123.53,
       "history": [
         {
           "date": "2024-12-31",
@@ -1820,8 +1820,8 @@
           "value": 121.67
         },
         {
-          "date": "2026-11-13",
-          "value": 122.65
+          "date": "2026-11-20",
+          "value": 123.6
         }
       ],
       "name": "美元指数 (广义)"
@@ -1903,7 +1903,7 @@
       "previous": 20.3,
       "date": "2026-11-25T08:30:00-05:00",
       "title": "Unemployment Claims",
-      "impact": "Medium"
+      "impact": "Low"
     }
   },
   "actuals": {
@@ -1920,9 +1920,9 @@
     "JTSJOL": 752.3,
     "A191RL1Q225SBEA": 3.4,
     "RSAFS": 0.21,
-    "DGS2": 4.76,
-    "DGS10": 5.04,
-    "DTWEXBGS": 122.65
+    "DGS2": 4.63,
+    "DGS10": 4.92,
+    "DTWEXBGS": 123.6
   },
   "actual_details": {
     "CPIAUCSL": {
@@ -2017,24 +2017,24 @@
       "source": "fred"
     },
     "DGS2": {
-      "actual": 4.76,
+      "actual": 4.63,
       "forecast": null,
       "previous": null,
-      "date": "2026-11-19",
+      "date": "2026-11-20",
       "source": "fred"
     },
     "DGS10": {
-      "actual": 5.04,
+      "actual": 4.92,
       "forecast": null,
       "previous": null,
-      "date": "2026-11-19",
+      "date": "2026-11-20",
       "source": "fred"
     },
     "DTWEXBGS": {
-      "actual": 122.65,
+      "actual": 123.6,
       "forecast": null,
       "previous": null,
-      "date": "2026-11-13",
+      "date": "2026-11-20",
       "source": "fred"
     }
   },
@@ -2052,8 +2052,8 @@
     "JTSJOL": 752.3,
     "A191RL1Q225SBEA": 3.4,
     "RSAFS": 0.21,
-    "DGS2": 4.76,
-    "DGS10": 5.04,
-    "DTWEXBGS": 122.65
+    "DGS2": 4.63,
+    "DGS10": 4.92,
+    "DTWEXBGS": 123.6
   }
 }
