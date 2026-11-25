@@ -1,5 +1,5 @@
 {
-  "updated_at_bjt": "2026-11-25 14:07:04",
+  "updated_at_bjt": "2026-11-26 06:40:26",
   "series": {
     "CPIAUCSL": {
       "date": "2026-10-01",
@@ -214,16 +214,12 @@
       "name": "核心 CPI"
     },
     "PCEPI": {
-      "date": "2026-09-01",
-      "latest": 0.49,
-      "prev": 0.32,
-      "yoy": 3.65,
-      "raw": 132.257,
+      "date": "2026-10-01",
+      "latest": 0.32,
+      "prev": 0.5,
+      "yoy": 3.84,
+      "raw": 132.703,
       "history": [
-        {
-          "date": "2024-10-01",
-          "value": 0.27
-        },
         {
           "date": "2024-11-01",
           "value": 0.15
@@ -310,26 +306,26 @@
         },
         {
           "date": "2026-08-01",
-          "value": 0.32
+          "value": 0.34
         },
         {
           "date": "2026-09-01",
-          "value": 0.49
+          "value": 0.5
+        },
+        {
+          "date": "2026-10-01",
+          "value": 0.32
         }
       ],
       "name": "PCE 物价指数"
     },
     "PCEPILFE": {
-      "date": "2026-09-01",
-      "latest": 0.32,
-      "prev": 0.26,
-      "yoy": 3.12,
-      "raw": 130.902,
+      "date": "2026-10-01",
+      "latest": 0.29,
+      "prev": 0.32,
+      "yoy": 3.26,
+      "raw": 131.312,
       "history": [
-        {
-          "date": "2024-10-01",
-          "value": 0.29
-        },
         {
           "date": "2024-11-01",
           "value": 0.14
@@ -416,11 +412,15 @@
         },
         {
           "date": "2026-08-01",
-          "value": 0.26
+          "value": 0.27
         },
         {
           "date": "2026-09-01",
           "value": 0.32
+        },
+        {
+          "date": "2026-10-01",
+          "value": 0.29
         }
       ],
       "name": "核心 PCE"
@@ -953,8 +953,8 @@
       "name": "平均时薪"
     },
     "ICSA": {
-      "date": "2026-11-14",
-      "latest": 20.3,
+      "date": "2026-11-21",
+      "latest": 18.9,
       "prev": 20.2,
       "history": [
         {
@@ -1050,8 +1050,8 @@
           "value": 19.1
         },
         {
-          "date": "2026-11-14",
-          "value": 20.3
+          "date": "2026-11-21",
+          "value": 18.9
         }
       ],
       "name": "初请失业金人数"
@@ -1162,7 +1162,7 @@
     },
     "A191RL1Q225SBEA": {
       "date": "2026-07-01",
-      "latest": 3.4,
+      "latest": 4.3,
       "prev": 2.2,
       "history": [
         {
@@ -1195,7 +1195,7 @@
         },
         {
           "date": "2026-07-01",
-          "value": 3.4
+          "value": 4.3
         }
       ],
       "name": "GDP 季度增速"
@@ -1307,7 +1307,7 @@
       "name": "零售销售"
     },
     "DFEDTARU": {
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "latest": 4.0,
       "prev": 4.0,
       "history": [
@@ -1404,14 +1404,14 @@
           "value": 4.0
         },
         {
-          "date": "2026-11-24",
+          "date": "2026-11-25",
           "value": 4.0
         }
       ],
       "name": "联邦基金利率上限"
     },
     "DFEDTARL": {
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "latest": 3.75,
       "prev": 3.75,
       "history": [
@@ -1508,14 +1508,14 @@
           "value": 3.75
         },
         {
-          "date": "2026-11-24",
+          "date": "2026-11-25",
           "value": 3.75
         }
       ],
       "name": "联邦基金利率下限"
     },
     "DGS2": {
-      "date": "2026-11-23",
+      "date": "2026-11-24",
       "latest": 4.63,
       "prev": 4.63,
       "history": [
@@ -1612,15 +1612,15 @@
           "value": 4.56
         },
         {
-          "date": "2026-11-23",
+          "date": "2026-11-24",
           "value": 4.63
         }
       ],
       "name": "2 年期美债收益率"
     },
     "DGS10": {
-      "date": "2026-11-23",
-      "latest": 4.92,
+      "date": "2026-11-24",
+      "latest": 4.91,
       "prev": 4.92,
       "history": [
         {
@@ -1716,8 +1716,8 @@
           "value": 4.94
         },
         {
-          "date": "2026-11-23",
-          "value": 4.92
+          "date": "2026-11-24",
+          "value": 4.91
         }
       ],
       "name": "10 年期美债收益率"
@@ -1873,55 +1873,25 @@
       ]
     }
   },
-  "expectations": {
-    "PCEPILFE": 0.3,
-    "A191RL1Q225SBEA": 3.5,
-    "ICSA": 20.1
-  },
-  "future_expectations": {
-    "PCEPILFE": 0.3,
-    "A191RL1Q225SBEA": 3.5,
-    "ICSA": 20.1
-  },
-  "future_expectation_details": {
-    "PCEPILFE": {
-      "forecast": 0.3,
-      "previous": 0.3,
-      "date": "2026-11-25T08:30:00-05:00",
-      "title": "Core PCE Price Index m/m",
-      "impact": "High"
-    },
-    "A191RL1Q225SBEA": {
-      "forecast": 3.5,
-      "previous": 3.4,
-      "date": "2026-11-25T08:30:00-05:00",
-      "title": "Prelim GDP q/q",
-      "impact": "High"
-    },
-    "ICSA": {
-      "forecast": 20.1,
-      "previous": 20.3,
-      "date": "2026-11-25T08:30:00-05:00",
-      "title": "Unemployment Claims",
-      "impact": "Low"
-    }
-  },
+  "expectations": {},
+  "future_expectations": {},
+  "future_expectation_details": {},
   "actuals": {
     "CPIAUCSL": 0.35,
     "CPILFESL": 0.3,
-    "PCEPI": 0.49,
-    "PCEPILFE": 0.32,
+    "PCEPI": 0.32,
+    "PCEPILFE": 0.29,
     "PPIFIS": 0.35,
     "PPIFES": 0.33,
     "PAYEMS": 16.5,
     "UNRATE": 4.1,
     "CES0500000003": 0.37,
-    "ICSA": 20.3,
+    "ICSA": 18.9,
     "JTSJOL": 752.3,
-    "A191RL1Q225SBEA": 3.4,
+    "A191RL1Q225SBEA": 4.3,
     "RSAFS": 0.21,
     "DGS2": 4.63,
-    "DGS10": 4.92,
+    "DGS10": 4.91,
     "DTWEXBGS": 123.6
   },
   "actual_details": {
@@ -1940,17 +1910,17 @@
       "source": "fred"
     },
     "PCEPI": {
-      "actual": 0.49,
-      "forecast": null,
-      "previous": null,
-      "date": "2026-09-01",
-      "source": "fred"
-    },
-    "PCEPILFE": {
       "actual": 0.32,
       "forecast": null,
       "previous": null,
-      "date": "2026-09-01",
+      "date": "2026-10-01",
+      "source": "fred"
+    },
+    "PCEPILFE": {
+      "actual": 0.29,
+      "forecast": null,
+      "previous": null,
+      "date": "2026-10-01",
       "source": "fred"
     },
     "PPIFIS": {
@@ -1989,10 +1959,10 @@
       "source": "fred"
     },
     "ICSA": {
-      "actual": 20.3,
+      "actual": 18.9,
       "forecast": null,
       "previous": null,
-      "date": "2026-11-14",
+      "date": "2026-11-21",
       "source": "fred"
     },
     "JTSJOL": {
@@ -2003,7 +1973,7 @@
       "source": "fred"
     },
     "A191RL1Q225SBEA": {
-      "actual": 3.4,
+      "actual": 4.3,
       "forecast": null,
       "previous": null,
       "date": "2026-07-01",
@@ -2020,14 +1990,14 @@
       "actual": 4.63,
       "forecast": null,
       "previous": null,
-      "date": "2026-11-23",
+      "date": "2026-11-24",
       "source": "fred"
     },
     "DGS10": {
-      "actual": 4.92,
+      "actual": 4.91,
       "forecast": null,
       "previous": null,
-      "date": "2026-11-23",
+      "date": "2026-11-24",
       "source": "fred"
     },
     "DTWEXBGS": {
@@ -2041,19 +2011,19 @@
   "fred_latest": {
     "CPIAUCSL": 0.35,
     "CPILFESL": 0.3,
-    "PCEPI": 0.49,
-    "PCEPILFE": 0.32,
+    "PCEPI": 0.32,
+    "PCEPILFE": 0.29,
     "PPIFIS": 0.35,
     "PPIFES": 0.33,
     "PAYEMS": 16.5,
     "UNRATE": 4.1,
     "CES0500000003": 0.37,
-    "ICSA": 20.3,
+    "ICSA": 18.9,
     "JTSJOL": 752.3,
-    "A191RL1Q225SBEA": 3.4,
+    "A191RL1Q225SBEA": 4.3,
     "RSAFS": 0.21,
     "DGS2": 4.63,
-    "DGS10": 4.92,
+    "DGS10": 4.91,
     "DTWEXBGS": 123.6
   }
 }
