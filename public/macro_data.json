@@ -1,5 +1,5 @@
 {
-  "updated_at_bjt": "2026-11-27 13:52:41",
+  "updated_at_bjt": "2026-11-28 06:15:24",
   "series": {
     "CPIAUCSL": {
       "date": "2026-10-01",
@@ -1307,7 +1307,7 @@
       "name": "零售销售"
     },
     "DFEDTARU": {
-      "date": "2026-11-26",
+      "date": "2026-11-27",
       "latest": 4.0,
       "prev": 4.0,
       "history": [
@@ -1404,14 +1404,14 @@
           "value": 4.0
         },
         {
-          "date": "2026-11-26",
+          "date": "2026-11-27",
           "value": 4.0
         }
       ],
       "name": "联邦基金利率上限"
     },
     "DFEDTARL": {
-      "date": "2026-11-26",
+      "date": "2026-11-27",
       "latest": 3.75,
       "prev": 3.75,
       "history": [
@@ -1508,15 +1508,15 @@
           "value": 3.75
         },
         {
-          "date": "2026-11-26",
+          "date": "2026-11-27",
           "value": 3.75
         }
       ],
       "name": "联邦基金利率下限"
     },
     "DGS2": {
-      "date": "2026-11-24",
-      "latest": 4.63,
+      "date": "2026-11-25",
+      "latest": 4.61,
       "prev": 4.63,
       "history": [
         {
@@ -1612,16 +1612,16 @@
           "value": 4.56
         },
         {
-          "date": "2026-11-24",
-          "value": 4.63
+          "date": "2026-11-25",
+          "value": 4.61
         }
       ],
       "name": "2 年期美债收益率"
     },
     "DGS10": {
-      "date": "2026-11-24",
-      "latest": 4.91,
-      "prev": 4.92,
+      "date": "2026-11-25",
+      "latest": 4.85,
+      "prev": 4.91,
       "history": [
         {
           "date": "2024-12-31",
@@ -1716,8 +1716,8 @@
           "value": 4.94
         },
         {
-          "date": "2026-11-24",
-          "value": 4.91
+          "date": "2026-11-25",
+          "value": 4.85
         }
       ],
       "name": "10 年期美债收益率"
@@ -1890,8 +1890,8 @@
     "JTSJOL": 752.3,
     "A191RL1Q225SBEA": 4.3,
     "RSAFS": 0.21,
-    "DGS2": 4.63,
-    "DGS10": 4.91,
+    "DGS2": 4.61,
+    "DGS10": 4.85,
     "DTWEXBGS": 123.6
   },
   "actual_details": {
@@ -1987,17 +1987,17 @@
       "source": "fred"
     },
     "DGS2": {
-      "actual": 4.63,
+      "actual": 4.61,
       "forecast": null,
       "previous": null,
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "source": "fred"
     },
     "DGS10": {
-      "actual": 4.91,
+      "actual": 4.85,
       "forecast": null,
       "previous": null,
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "source": "fred"
     },
     "DTWEXBGS": {
@@ -2022,8 +2022,8 @@
     "JTSJOL": 752.3,
     "A191RL1Q225SBEA": 4.3,
     "RSAFS": 0.21,
-    "DGS2": 4.63,
-    "DGS10": 4.91,
+    "DGS2": 4.61,
+    "DGS10": 4.85,
     "DTWEXBGS": 123.6
   }
 }
